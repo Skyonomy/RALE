@@ -55,6 +55,27 @@ class AuditorNode(BaseNode):
         except Exception as e:
             logger.warning(f"AuditorNode: Error parsing proposal: {e}")
 
+        # Defensive Check: If parsing failed, trigger self-healing instead of crashing
+        if not proposal:
+            database.log_validation_attempt(self.run_id, self.attempt, "REJECTED", "Schema parsing failure.")
+            database.log_custom_event(self.run_id, "Auditor", "❌ REJECTED: Schema parsing failure. Output does not match VisionResponse.")
+            if self.attempt >= 3:
+                database.log_custom_event(self.run_id, "Auditor", "💥 FATAL: Maximum retries (3) reached. Aborting pipeline.")
+                yield Event(actions=EventActions(route="FAILED"), output="Schema parsing failure.")
+            else:
+                database.log_custom_event(self.run_id, "Auditor", "🔄 Escalating to Pro Tier. Triggering Playwright self-healing coordinate repair...")
+                image_binary_b64 = ctx.session.state.get('image_binary')
+                rejection_package = "Error: Output must be valid JSON matching the VisionResponse schema. Please regenerate and format strictly as JSON."
+                if image_binary_b64:
+                    import base64
+                    from google.genai import types
+                    img_bytes = base64.b64decode(image_binary_b64.encode('utf-8'))
+                    image_part = types.Part.from_bytes(data=img_bytes, mime_type="image/png")
+                    yield Event(actions=EventActions(route="REJECTED"), output=[rejection_package, image_part])
+                else:
+                    yield Event(actions=EventActions(route="REJECTED"), output=rejection_package)
+            return
+
         # 2. Check for tool rejections first (from previous agent's function calls)
         tool_rejection = None
         try:
