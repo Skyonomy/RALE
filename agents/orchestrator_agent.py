@@ -136,9 +136,12 @@ class AuditorNode(BaseNode):
                             proposals_list.append(f"- Stop #{lbl.number} ({lbl.location_name}): [ymin: {lbl.ymin}, xmin: {lbl.xmin}, ymax: {lbl.ymax}, xmax: {lbl.xmax}]")
                         proposals_str = "\n".join(proposals_list)
                         
-                        # Connect to Gemini 2.5 Flash using dynamic key
-                        km = ctx.session.state.get('config', {}).get('api_key') or os.environ.get("GOOGLE_API_KEY")
-                        client = genai.Client(api_key=km)
+                        # Connect to Gemini 2.5 Flash using dynamic key or ADC
+                        if os.getenv("GOOGLE_GENAI_USE_VERTEXAI", "false").lower() == "true":
+                            client = genai.Client()
+                        else:
+                            km = ctx.session.state.get('config', {}).get('api_key') or os.environ.get("GOOGLE_API_KEY")
+                            client = genai.Client(api_key=km)
                         
                         scenario_name = ctx.session.state.get('scenario', 'Theme Park')
                         semantic_prompt = f"""You are a strict GRC compliance auditor performing a semantic visual compliance scan on a newly generated 2D site map of: {scenario_name}.
