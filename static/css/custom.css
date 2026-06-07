@@ -1,0 +1,93 @@
+/* Custom scrollbar configurations */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* Karaoke audio subtitles highlight */
+.karaoke-word {
+    transition: all 0.2s ease;
+    padding: 1px 3.5px;
+    margin: 0 1.5px;
+    border-radius: 4px;
+    display: inline-block;
+}
+.karaoke-highlight {
+    background-color: #2dd4bf !important;
+    color: #020617 !important;
+    transform: scale(1.08);
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.6);
+    font-weight: 900 !important;
+}
+#theaterScript {
+    line-height: 2.1 !important;
+    word-spacing: 0.18em !important;
+    letter-spacing: 0.02em !important;
+}
+
+/* Paper texture effect for IELTS leaflet and questions cards */
+.paper-texture {
+    background-color: #ffffff;
+    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* Scanner laser animation on the map canvas */
+.scanner-line {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    width: 100%;
+    height: 10%;
+    background: linear-gradient(to bottom, transparent, rgba(20, 184, 166, 0.4), transparent);
+    box-shadow: 0 0 15px rgba(20, 184, 166, 0.5);
+    z-index: 20;
+}
+.scanning .scanner-line {
+    animation: scan 3s ease-in-out infinite;
+}
+@keyframes scan {
+    0% { top: -10%; }
+    50% { top: 100%; }
+    100% { top: -10%; }
+}
+
+/* State machine log highlight classes */
+.log-rejected {
+    background-color: rgba(159, 18, 57, 0.4) !important;
+    border: 1px solid rgba(244, 63, 94, 0.5) !important;
+    animation: shakeX 1s;
+}
+.log-healing {
+    background-color: rgba(30, 58, 138, 0.4) !important;
+    border: 1px solid rgba(59, 130, 246, 0.5) !important;
+    animation: pulse 2s infinite;
+}
+.log-passed {
+    background-color: rgba(6, 78, 59, 0.2) !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(20, 184, 166, 0.4);
+        border-color: rgba(20, 184, 166, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(20, 184, 166, 0.8);
+        border-color: rgba(20, 184, 166, 1);
+    }
+}
+.btn-next-highlight {
+    animation: pulse-glow 2s infinite;
+    border-width: 2px !important;
+}

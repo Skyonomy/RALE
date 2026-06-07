@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RALE powered by Skyonomy | Horizontal Multimodal Validation Framework</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <!-- Separation of Styling Concerns -->
+    <link rel="stylesheet" href="/static/css/custom.css"/>
+</head>
+<body class="bg-slate-950 text-white selection:bg-teal-500/30 font-sans min-h-screen flex flex-col">
+
+    <!-- HUD GLOWING HEADER -->
+    <header class="p-6 border-b border-slate-800 bg-[#091124] backdrop-blur-md flex flex-col lg:flex-row justify-between items-center gap-4 z-50 relative shadow-2xl">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-teal-500/20">
+                <svg class="w-6 h-6 text-slate-950" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            </div>
+            <div>
+                <h1 class="text-2xl font-black tracking-tighter text-white uppercase">RALE ARCHITECT <span class="text-teal-500 italic lowercase text-sm font-bold">powered by Skyonomy</span></h1>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
+                    Horizontal Multimodal Validation Framework
+                    <span class="bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-600/30 font-black uppercase tracking-tighter">ADK, ADK FunctionTool & ADK Event Native</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- TABS FOR STANDALONE FOUR-PAGE OBSERVABILITY ARCHITECTURE -->
+        <div id="viewTabs" class="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
+            <button id="tabProduct" class="px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all bg-teal-500 text-slate-950 shadow-lg">Command Center</button>
+            <button id="tabMap" class="px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all text-slate-400 hover:text-white">Interactive Map</button>
+            <button id="tabExam" class="px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all text-slate-400 hover:text-white">Candidate Exam</button>
+            <button id="tabArchitecture" class="relative px-5 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all text-slate-400 hover:text-white">
+                System Diagnostics
+                <span id="archPulse" class="hidden absolute -top-1 -right-1 flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                </span>
+            </button>
+        </div>
+
+        <div id="headerActions" class="flex gap-4 items-center">
+            <span id="totalLatencyDisplay" class="text-slate-500 font-mono text-xs font-black uppercase tracking-wider"></span>
+            <span id="totalLatency" class="hidden"></span>
+            <button id="resetBtn" class="hidden text-slate-400 hover:text-white text-xs font-black uppercase tracking-widest border border-slate-700 px-4 py-2 rounded-lg transition-all">New Session</button>
+        </div>
+    </header>
+
+    <!-- MAIN ROOT VIEWPORTS -->
+    <main class="flex-1 w-full p-6 lg:p-8">
+
+        <!-- PAGE 1: COMMAND CENTER (Transformational Observatory Dashboard) -->
+        <div id="productView" class="grid grid-cols-1 lg:grid-cols-12 gap-8 animate__animated animate__fadeIn max-w-[1600px] mx-auto">
+            
+            <!-- COLUMN 1: CONTROL DECK (Initially centered, col-span-12) -->
+            <div id="leftSidebar" class="col-span-12 max-w-4xl mx-auto w-full space-y-8 flex flex-col transition-all duration-500">
+                <div class="space-y-3 text-center">
+                    <div class="inline-flex items-center gap-2 bg-teal-500/10 text-teal-400 px-3.5 py-1.5 rounded-full border border-teal-500/20 text-[10px] font-black uppercase tracking-widest mb-1">
+                        <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+                        Simulation Setup Center
+                    </div>
+                    <h2 class="text-2xl font-black tracking-[0.25em] text-white uppercase">STAGE 01: SIMULATION ARCHITECTURE</h2>
+                    <p class="text-slate-400 text-xs max-w-2xl mx-auto leading-relaxed">
+                        Select a predefined theme environment or describe a custom scenario. The horizontal multi-agent DAG will model the layout, determine safe-zone boundaries, check spatial constraints, and stream real-time GRC validation logs.
+                    </p>
+                </div>
+
+                <div class="bg-[#091124]/90 backdrop-blur-md border border-slate-800 p-8 rounded-3xl shadow-2xl grid grid-cols-1 md:grid-cols-2 gap-8 relative overflow-hidden group hover:border-slate-700/60 transition-all duration-300">
+                    <!-- Subtle background decorative glows -->
+                    <div class="absolute -right-20 -top-20 w-80 h-80 bg-teal-500/5 rounded-full blur-3xl group-hover:bg-teal-500/10 transition-all duration-500 pointer-events-none"></div>
+                    <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-all duration-500 pointer-events-none"></div>
+
+                    <!-- Left Column: Scenario Theme Selection -->
+                    <div class="space-y-4 flex flex-col justify-between relative z-10">
+                        <div class="space-y-4">
+                            <label class="text-xs font-black uppercase tracking-[0.2em] text-teal-400 flex items-center gap-2 mb-1">
+                                <span class="text-base">🌍</span> Configuration Mode
+                            </label>
+
+                            <!-- Option A: Predefined Theme -->
+                            <div id="optionPredefinedCard" class="p-4 bg-slate-950 border-2 border-teal-500/80 rounded-2xl cursor-pointer transition-all duration-300 relative group flex flex-col gap-3">
+                                <label class="flex items-start gap-3 cursor-pointer select-none">
+                                    <div class="relative flex items-center justify-center mt-0.5">
+                                        <input type="radio" name="scenarioType" value="predefined" checked class="peer appearance-none w-4 h-4 border-2 border-slate-700 rounded-full checked:border-teal-500 checked:bg-teal-500 transition-all cursor-pointer">
+                                        <span class="absolute w-1.5 h-1.5 rounded-full bg-slate-950 opacity-0 peer-checked:opacity-100 pointer-events-none"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-black uppercase text-slate-200 tracking-wider group-hover:text-teal-400 transition-colors">Predefined Environment Theme</span>
+                                        <p class="text-[9px] text-slate-500 mt-0.5">Select a fully-validated predefined baseline theme.</p>
+                                    </div>
+                                </label>
+
+                                <div class="relative pl-7" onclick="event.stopPropagation();">
+                                    <select id="scenarioSelect" class="w-full bg-slate-900 border border-slate-800 text-white px-3.5 py-3 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 font-bold text-xs cursor-pointer transition-all hover:border-slate-700 appearance-none">
+                                        <option value="A Family-Friendly Theme Park Resort">Theme Park Resort (Default)</option>
+                                        <option value="A Vibrant Tropical Wildlife Zoo">Wildlife Zoo</option>
+                                        <option value="A Lush City Botanical Garden">Botanical Garden</option>
+                                        <option value="A Prestigious University Campus">University Campus</option>
+                                        <option value="A Historic Downtown Museum District">Historic Museum District</option>
+                                    </select>
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-500">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Option B: Custom Scenario Prompt -->
+                            <div id="optionCustomCard" class="p-4 bg-slate-950/40 border border-slate-850 rounded-2xl cursor-pointer transition-all duration-300 relative group opacity-50 flex flex-col gap-3 hover:border-slate-700/60">
+                                <label class="flex items-start gap-3 cursor-pointer select-none">
+                                    <div class="relative flex items-center justify-center mt-0.5">
+                                        <input type="radio" name="scenarioType" value="custom" class="peer appearance-none w-4 h-4 border-2 border-slate-700 rounded-full checked:border-teal-500 checked:bg-teal-500 transition-all cursor-pointer">
+                                        <span class="absolute w-1.5 h-1.5 rounded-full bg-slate-950 opacity-0 peer-checked:opacity-100 pointer-events-none"></span>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-black uppercase text-slate-200 tracking-wider group-hover:text-teal-400 transition-colors">Describe Custom Scenario</span>
+                                        <p class="text-[9px] text-slate-500 mt-0.5">Type any custom theme scenario using prompt descriptions.</p>
+                                    </div>
+                                </label>
+
+                                <div class="relative pl-7" onclick="event.stopPropagation();">
+                                    <textarea id="customScenarioInput" rows="2" disabled class="w-full bg-slate-900 border border-slate-800 text-white px-3.5 py-3 rounded-xl outline-none focus:ring-2 focus:ring-teal-500 font-bold text-xs placeholder:text-slate-700 transition-all resize-none opacity-50" placeholder="e.g., A Futuristic Space Colony Center with modular landing bays and glass domes..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-4 border-t border-slate-800/60">
+                            <p class="text-[10px] text-slate-500 italic leading-relaxed">
+                                <strong class="text-teal-500">PRO TIP:</strong> Predefined themes run instantly when using Fast-Forward mode, serving as fully-validated compliance baselines.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Divider on desktop -->
+                    <div class="hidden md:block absolute left-1/2 top-8 bottom-8 w-[1px] bg-slate-800/80 pointer-events-none"></div>
+
+                    <!-- Right Column: Run Parameters & Launch Button -->
+                    <div class="space-y-6 flex flex-col justify-between relative z-10 md:pl-4">
+                        <div class="space-y-4">
+                            <label class="text-xs font-black uppercase tracking-[0.2em] text-teal-400 flex items-center gap-2">
+                                <span class="text-base">⚙️</span> Run Parameters
+                            </label>
+
+                            <!-- Spatial Stress Mode -->
+                            <div class="p-4 bg-slate-950/60 border border-slate-850 rounded-2xl hover:border-slate-800 hover:bg-slate-950 transition-all duration-200">
+                                <label class="flex items-start gap-3 cursor-pointer group">
+                                    <div class="relative flex items-center justify-center mt-0.5">
+                                        <input type="checkbox" id="stressTestToggle" class="peer appearance-none w-4 h-4 border-2 border-slate-700 rounded bg-slate-950 checked:bg-teal-500 checked:border-teal-500 transition-all cursor-pointer">
+                                        <svg class="absolute w-2.5 h-2.5 text-slate-950 opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-black uppercase text-teal-400 group-hover:text-teal-300 transition-colors">Spatial Stress Mode</span>
+                                        <p class="text-[9px] text-slate-400 mt-1 leading-relaxed italic">Tightens safe-zone bounds to force deterministic Auditor failures and trigger the Playwright recovery loop.</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Demo Fast-Forward -->
+                            <div id="fastForwardContainer" class="p-4 bg-slate-950/60 border border-slate-850 rounded-2xl hover:border-slate-800 hover:bg-slate-950 transition-all duration-200">
+                                <label class="flex items-start gap-3 cursor-pointer group">
+                                    <div class="relative flex items-center justify-center mt-0.5">
+                                        <input type="checkbox" id="fastForwardToggle" class="peer appearance-none w-4 h-4 border-2 border-slate-700 rounded bg-slate-950 checked:bg-teal-500 checked:border-teal-500 transition-all cursor-pointer">
+                                        <svg class="absolute w-2.5 h-2.5 text-slate-950 opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-black uppercase text-teal-400 group-hover:text-teal-300 transition-colors">Demo Fast-Forward</span>
+                                        <p class="text-[9px] text-slate-400 mt-1 leading-relaxed italic">Runs a high-speed cached simulation in 4 seconds to instantly demonstrate the self-healing and GRC telemetry loop.</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Initiate Button -->
+                        <div class="relative">
+                            <button id="processBtn" class="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black py-4 rounded-2xl uppercase tracking-[0.25em] transition-all shadow-xl text-sm border-b-4 border-teal-950 active:border-b-0 active:translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+                                <svg class="w-4 h-4 fill-none animate-spin hidden" id="btnSpinner" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                <span>Initiate Agent DAG</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMN 2: ACTIVE ADK TRACE TERMINAL CENTERPIECE (Initially hidden, 8/12 cols when active) -->
+            <div id="centerWorkspace" class="hidden lg:col-span-8 space-y-6">
+                <div class="space-y-2">
+                    <h2 class="text-xs font-black tracking-[0.2em] text-teal-400 uppercase">// SECTION 02: ACTIVE ADK TRACE TERMINAL</h2>
+                </div>
+
+                <div class="bg-[#091124] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex-1 flex flex-col h-[550px] transition-all duration-300">
+                    <div class="p-3 border-b border-slate-800 bg-slate-900/80 flex justify-between items-center">
+                        <h3 class="text-[9px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
+                            Active ADK Trace Terminal
+                        </h3>
+                        <div class="flex items-center gap-4">
+                            <span class="text-[8px] font-bold text-slate-500 uppercase tracking-tighter hidden md:inline-block">GRC = Geometry, Rubric, Consistency</span>
+                            <span class="text-[8px] font-bold text-slate-600 uppercase tracking-tighter">Stream Connected</span>
+                        </div>
+                    </div>
+                    <!-- CINEMATIC STATUS HUD CARD -->
+                    <div id="cinematicStepHud" class="bg-slate-950/80 border-b border-slate-800 px-5 py-4 flex flex-col justify-center min-h-[70px] transition-all duration-300">
+                        <div class="text-[8px] font-extrabold uppercase tracking-[0.2em] text-teal-500 mb-1 flex items-center gap-2">
+                            <span class="inline-block w-2 h-2 rounded-full bg-teal-500 animate-ping"></span>
+                            <span>System Status</span>
+                        </div>
+                        <div id="cinematicStepTitle" class="text-xs font-black uppercase tracking-wide text-slate-300">// AWAITING INITIATION</div>
+                    </div>
+
+                    <!-- COMPACT RUN RESULT SUMMARY CARD (Priority 2) -->
+                    <div id="quickSummaryCard" class="hidden bg-slate-950 border-b border-slate-800 px-5 py-3.5 grid grid-cols-5 gap-3 items-center justify-between text-center select-none animate__animated animate__fadeIn">
+                        <div class="space-y-0.5">
+                            <span class="text-[7px] font-black tracking-widest text-slate-500 uppercase block">GRC Alerts</span>
+                            <p id="sumFailures" class="text-[10px] font-black text-rose-400 uppercase">AWAITING</p>
+                        </div>
+                        <div class="space-y-0.5 border-l border-slate-800">
+                            <span class="text-[7px] font-black tracking-widest text-slate-500 uppercase block">Self-Heals</span>
+                            <p id="sumRepairs" class="text-[10px] font-black text-amber-400 uppercase">AWAITING</p>
+                        </div>
+                        <div class="space-y-0.5 border-l border-slate-800">
+                            <span class="text-[7px] font-black tracking-widest text-slate-500 uppercase block">Landmarks</span>
+                            <p id="sumLandmarks" class="text-[10px] font-black text-emerald-400 uppercase">0 / 5</p>
+                        </div>
+                        <div class="space-y-0.5 border-l border-slate-800">
+                            <span class="text-[7px] font-black tracking-widest text-slate-500 uppercase block">Assessment</span>
+                            <p id="sumMCQs" class="text-[10px] font-black text-teal-400 uppercase">0 MCQs</p>
+                        </div>
+                        <div class="space-y-0.5 border-l border-slate-800 bg-teal-500/10 p-1 rounded border border-teal-500/20">
+                            <span class="text-[6px] font-black tracking-widest text-teal-400 uppercase block">Artifact</span>
+                            <p id="sumStatus" class="text-[8px] font-black text-white uppercase tracking-wider">AWAITING</p>
+                        </div>
+                    </div>
+
+                    <div id="traceLog" class="flex-1 p-5 font-mono text-[10px] text-teal-400 space-y-1.5 overflow-y-auto custom-scrollbar bg-black/40 h-[400px]">
+                        <div class="text-slate-600 italic">// Awaiting initiation...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMN 3: OBSERVABILITY AGENT FLEET STATUS (Initially hidden, 4/12 cols when active) -->
+            <div id="rightSidebar" class="hidden lg:col-span-4 flex flex-col space-y-6">
+                <div class="space-y-2">
+                    <h2 class="text-xs font-black tracking-[0.2em] text-teal-400 uppercase">// SECTION 03: AGENT OBSERVABILITY</h2>
+                </div>
+
+                <div class="bg-[#091124] border border-slate-800 p-5 rounded-2xl shadow-2xl space-y-3.5 flex-1 flex flex-col justify-between">
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.1em] text-teal-500 mb-1 block">Active ADK Agent Fleet Status</h3>
+                    
+                    <!-- 1. Artist Agent -->
+                    <div id="agentCardArtist" class="agent-card border border-slate-800/80 bg-slate-950/40 p-3 rounded-xl flex justify-between items-center transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">🎨</span>
+                            <div>
+                                <h4 class="text-xs font-black text-white">Artist Agent</h4>
+                                <p class="text-[8px] text-slate-500 uppercase font-mono">Tier: Imagen 4.0 Fast</p>
+                            </div>
+                        </div>
+                        <span class="agent-status text-[8px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded font-black h-5 flex items-center justify-center text-center flex-shrink-0 min-w-[55px]">IDLE</span>
+                    </div>
+
+                    <!-- 2. Miner Agent -->
+                    <div id="agentCardMiner" class="agent-card border border-slate-800/80 bg-slate-950/40 p-3 rounded-xl flex justify-between items-center transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">🔍</span>
+                            <div>
+                                <h4 class="text-xs font-black text-white">Miner Agent</h4>
+                                <p class="text-[8px] text-teal-500/80 uppercase font-mono font-bold">Tier: Economy (Flash 2.5)</p>
+                            </div>
+                        </div>
+                        <span class="agent-status text-[8px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded font-black h-5 flex items-center justify-center text-center flex-shrink-0 min-w-[55px]">IDLE</span>
+                    </div>
+
+                    <!-- 3. Auditor Node -->
+                    <div id="agentCardAuditor" class="agent-card border border-slate-800/80 bg-slate-950/40 p-3 rounded-xl flex justify-between items-center transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">⚖️</span>
+                            <div>
+                                <h4 class="text-xs font-black text-white">Auditor Node</h4>
+                                <p class="text-[8px] text-slate-500 uppercase font-mono">Tier: Deterministic Math Python</p>
+                            </div>
+                        </div>
+                        <span class="agent-status text-[8px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded font-black h-5 flex items-center justify-center text-center flex-shrink-0 min-w-[55px]">IDLE</span>
+                    </div>
+
+                    <!-- 4. Playwright Agent -->
+                    <div id="agentCardPlaywright" class="agent-card border border-slate-800/80 bg-slate-950/40 p-3 rounded-xl flex justify-between items-center transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">🛠️</span>
+                            <div>
+                                <h4 class="text-xs font-black text-white">Playwright Agent</h4>
+                                <p class="text-[8px] text-amber-500/80 uppercase font-mono font-bold">Tier: Escalated (Pro 2.5)</p>
+                            </div>
+                        </div>
+                        <span class="agent-status text-[8px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded font-black h-5 flex items-center justify-center text-center flex-shrink-0 min-w-[55px]">IDLE</span>
+                    </div>
+
+                    <!-- 5. Specialist Agent -->
+                    <div id="agentCardSpecialist" class="agent-card border border-slate-800/80 bg-slate-950/40 p-3 rounded-xl flex justify-between items-center transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">✍️</span>
+                            <div>
+                                <h4 class="text-xs font-black text-white">Specialist Agent</h4>
+                                <p class="text-[8px] text-slate-500 uppercase font-mono">Tier: Fast (Flash 2.5)</p>
+                            </div>
+                        </div>
+                        <span class="agent-status text-[8px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded font-black h-5 flex items-center justify-center text-center flex-shrink-0 min-w-[55px]">IDLE</span>
+                    </div>
+
+                    <!-- 6. Review Agent (MQA Node) -->
+                    <div id="agentCardReviewer" class="agent-card border border-slate-800/80 bg-slate-950/40 p-3 rounded-xl flex justify-between items-center transition-all duration-300">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">👁️</span>
+                            <div>
+                                <h4 class="text-xs font-black text-white">Review Agent (MQA)</h4>
+                                <p class="text-[8px] text-teal-500/80 uppercase font-mono font-bold">Tier: Multimodal (Flash 2.5)</p>
+                            </div>
+                        </div>
+                        <span class="agent-status text-[8px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded font-black h-5 flex items-center justify-center text-center flex-shrink-0 min-w-[55px]">IDLE</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 2: STANDALONE WIDESCREEN EXAM THEATER PANEL -->
+        <div id="theaterSection" class="hidden max-w-[1600px] mx-auto animate__animated animate__fadeIn">
+            
+            <!-- STEP 2A: MAP & LANDMARK INSPECTION (Widescreen layout) -->
+            <div id="completionMapView" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                <!-- Left Column: Enlarged Map Canvas (8/12 cols) -->
+                <div class="lg:col-span-8 bg-[#091124] border border-slate-800 p-6 rounded-3xl shadow-2xl flex flex-col justify-between min-h-[600px]">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-xl">🗺️</span>
+                            <div>
+                                <h3 id="theaterTitle" class="text-base font-black uppercase text-white tracking-wider">A Family-Friendly Theme Park Resort</h3>
+                                <p class="text-[9px] text-teal-400 font-mono uppercase tracking-widest">// Phase 2: Bounded Geometry Map Inspection</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center bg-slate-950 rounded-full p-1 border border-slate-800 shadow-md">
+                            <button id="viewStudent" class="px-4 py-1.5 rounded-full text-[10px] font-black transition-all bg-emerald-500 text-slate-950">STUDENT MODE</button>
+                            <button id="viewAgent" class="px-4 py-1.5 rounded-full text-[10px] font-black transition-all text-slate-400 hover:text-white">AGENT MODE</button>
+                        </div>
+                    </div>
+
+                    <div class="paper-texture p-4 rounded-2xl shadow-2xl border-2 border-slate-950 flex-1 flex items-center justify-center bg-white/5 relative">
+                        <div id="imageAuditContainer" class="relative w-full aspect-square max-h-[65vh] bg-white rounded-xl overflow-hidden shadow-2xl border-4 border-slate-950 transition-all duration-300">
+                            <div id="scanner" class="scanner-line"></div>
+                            <img id="theaterImg" src="" class="absolute top-0 left-0 w-full h-full object-contain transition-all duration-500">
+                            
+                            <!-- CENTER COORDINATE RING -->
+                            <div id="spatialGhost" class="absolute bg-rose-500/20 border-2 border-rose-500 rounded-full w-24 h-24 pointer-events-none opacity-0 transition-all duration-300 z-40 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center shadow-[0_0_25px_rgba(244,63,94,0.75)]">
+                                 <div class="w-full h-full animate-ping bg-rose-500/30 rounded-full"></div>
+                            </div>
+                            
+                            <!-- PERMANENT CARTOGRAPHIC HUD COMPASS -->
+                            <div class="absolute top-4 right-4 z-40 w-14 h-16 bg-slate-950/80 border border-slate-800 rounded-xl p-1 flex items-center justify-center shadow-lg backdrop-blur-sm">
+                                <svg class="w-full h-full text-teal-400" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="2" class="opacity-60" />
+                                    <circle cx="50" cy="50" r="15" fill="none" stroke="currentColor" stroke-width="1" class="opacity-30" />
+                                    <line x1="50" y1="10" x2="50" y2="90" stroke="currentColor" stroke-width="0.5" class="opacity-30" />
+                                    <line x1="10" y1="50" x2="90" y2="50" stroke="currentColor" stroke-width="0.5" class="opacity-30" />
+                                    <polygon points="50,50 44,50 50,15" fill="#00f5ff" />
+                                    <polygon points="50,50 56,50 50,15" fill="#2dd4bf" />
+                                    <polygon points="50,50 45,50 50,85" fill="#475569" class="opacity-60" />
+                                    <polygon points="50,50 55,50 50,85" fill="#64748b" class="opacity-60" />
+                                    <circle cx="50" cy="50" r="3" fill="#ffffff" />
+                                    <text x="50" y="29" font-size="12" font-weight="900" fill="#2dd4bf" text-anchor="middle">N</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Interactive Map Legend (4/12 cols) -->
+                <div class="lg:col-span-4 bg-white text-slate-900 p-6 rounded-3xl shadow-2xl paper-texture border-t-[12px] border-slate-900 flex flex-col justify-between min-h-[600px]">
+                    <div class="space-y-6">
+                        <div class="border-b border-slate-100 pb-3">
+                            <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">IELTS Assessment</p>
+                            <h3 class="text-xl font-black italic uppercase tracking-tighter text-slate-900">Map Legend</h3>
+                        </div>
+
+                        <!-- Tour Destinations Legend -->
+                        <section class="space-y-2.5">
+                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                                <span class="w-4 h-4 bg-slate-900 text-white rounded-full flex items-center justify-center text-[8px]">01</span>
+                                Map Legend: Tour Stops
+                            </h4>
+                            <p class="text-[9px] text-slate-500 italic leading-tight">Hover or click a stop below to locate its visual crosshairs on the map.</p>
+                            <div id="theaterAnswerKey" class="grid grid-cols-1 gap-1.5 max-h-[300px] overflow-y-auto custom-scrollbar pr-1"></div>
+                            <!-- MAP TOUR STATUS HUD PANEL (Priority 4) -->
+                            <div id="mapTourStatus" class="text-[10px] font-serif italic text-slate-500 leading-tight text-center mt-3 pt-2.5 border-t border-slate-100 flex items-center gap-1.5 justify-center">
+                                Hover or click a stop above to focus the crosshairs.
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-100">
+                        <button id="nextToExamBtn" class="btn-next-highlight w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black py-4 rounded-2xl uppercase tracking-[0.25em] transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 cursor-pointer text-xs">
+                            <span>Next: View Exam Questions</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2B: EXAM QUESTIONS & AUDIO TRAY (Initially hidden, widescreen layout) -->
+            <div id="completionExamView" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                <!-- Left Column: Synced Audio & Subtitles (6/12 cols) -->
+                <div class="lg:col-span-6 bg-white text-slate-900 p-6 rounded-3xl shadow-2xl paper-texture border-t-[12px] border-slate-900 flex flex-col justify-between min-h-[500px]">
+                    <div class="space-y-6">
+                        <div class="border-b border-slate-100 pb-3">
+                            <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">IELTS CD-IELTS System</p>
+                            <h3 class="text-xl font-black italic uppercase tracking-tighter text-slate-900">Listening Assessment</h3>
+                        </div>
+
+                        <!-- AUDIO PLAYER CARD FOR EXAM MODE -->
+                        <section class="space-y-3">
+                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                                <span class="w-4 h-4 bg-slate-900 text-white rounded-full flex items-center justify-center text-[8px]">02</span>
+                                Synced Audio Stream
+                            </h4>
+                            <div class="bg-slate-950 text-slate-100 p-4 rounded-xl shadow-md border border-slate-800 flex items-center gap-4">
+                                <button id="playAudioBtnExam" class="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center text-slate-950 hover:bg-teal-400 transition-all shadow-md active:scale-95 flex-shrink-0">
+                                    <svg class="w-5 h-5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                                </button>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between items-center mb-0.5">
+                                        <span id="audioStatusExam" class="text-[8px] font-black text-slate-400 uppercase tracking-widest truncate">Awaiting Play</span>
+                                    </div>
+                                    <div class="h-1 bg-slate-900 rounded-full overflow-hidden">
+                                        <div id="audioProgressExam" class="h-full bg-teal-500 w-0 transition-all duration-300"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Audio Artifact Metadata Panel (Priority 3) -->
+                        <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-2.5 font-mono text-[9px] text-slate-400">
+                            <div class="flex justify-between items-center pb-2 border-b border-slate-900">
+                                <span class="font-black uppercase tracking-wider text-slate-500">Audio Artifact Spec</span>
+                                <span class="bg-teal-500/20 text-teal-400 px-2.5 py-0.5 rounded-full font-black text-[8px] uppercase tracking-widest border border-teal-500/30">Verified</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>🗣️ Narrative Script Length</span>
+                                <span class="text-slate-100 font-bold">500+ words (Complete)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>🎙️ Aligned Audio Generation</span>
+                                <span class="text-emerald-400 font-bold flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    Success
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>⏱️ Caption Sync Calibration</span>
+                                <span class="text-emerald-400 font-bold">Active (Word-Level)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>🗺️ Questions Linked to Landmarks</span>
+                                <span class="text-teal-400 font-black">5 / 5 Validated</span>
+                            </div>
+                        </div>
+
+                        <!-- CINEMATIC SUBTITLE TRAY -->
+                        <section class="space-y-3 pt-3 border-t border-slate-100">
+                            <div class="flex justify-between items-center">
+                                <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
+                                    <span class="w-4 h-4 bg-slate-900 text-white rounded-full flex items-center justify-center text-[8px]">03</span>
+                                    Spoken Captions HUD
+                                </h4>
+                                <button id="toggleFullScriptBtn" class="text-[9px] font-black text-teal-500 hover:text-teal-400 transition-colors uppercase tracking-wider cursor-pointer">Show Full Script</button>
+                            </div>
+                            <div class="bg-slate-950 text-slate-200 p-4 rounded-xl border border-slate-800 shadow-inner">
+                                <div id="theaterScript" class="font-serif italic text-xs leading-relaxed text-slate-200 text-center min-h-[80px] max-h-[220px] overflow-y-auto custom-scrollbar">
+                                    Awaiting audio... click play to stream aligned spoken captions.
+                                </div>
+                            </div>
+                            <!-- API COST SAVINGS FOOTNOTE (Priority 3) -->
+                            <p class="text-[9.5px] text-slate-400 italic leading-tight text-center mt-2 flex items-center gap-1.5 justify-center">
+                                <span class="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse"></span>
+                                <strong>Note:</strong> Auditory karaoke captions are limited to the first 65 words of the tour to optimize Google Cloud API latency and token billing costs.
+                            </p>
+                        </section>
+                    </div>
+                    
+                    <div class="pt-6 border-t border-slate-100">
+                        <!-- Navigation Back to Map -->
+                        <button id="backToMapBtn" class="text-slate-500 hover:text-slate-900 text-xs font-black uppercase tracking-widest transition-all cursor-pointer">
+                            &larr; Back to Map
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Column: Assessment Questions (6/12 cols) -->
+                <div class="lg:col-span-6 bg-white text-slate-900 p-6 rounded-3xl shadow-2xl paper-texture border-t-[12px] border-slate-900 flex flex-col justify-between min-h-[500px]">
+                    <div class="space-y-6">
+                        <div class="border-b border-slate-100 pb-3">
+                            <p class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">IELTS Exam Paper</p>
+                            <h3 class="text-xl font-black italic uppercase tracking-tighter text-slate-900">Multiple Choice Questions</h3>
+                        </div>
+
+                        <section class="space-y-4">
+                            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2 mb-2">
+                                <span class="w-4 h-4 bg-slate-900 text-white rounded-full flex items-center justify-center text-[8px]">04</span>
+                                Assessment Modules (5 MCQs)
+                            </h4>
+                            <div id="theaterQuestions" class="space-y-4 max-h-[350px] overflow-y-auto custom-scrollbar pr-1"></div>
+                        </section>
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-100">
+                        <button id="nextToGRCBtn" class="btn-next-highlight w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-black py-4 rounded-2xl uppercase tracking-[0.25em] transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 cursor-pointer text-xs">
+                            <span>Next: View GRC Verification</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 3: SYSTEM ARCHITECTURE (Mermaid DAG + Live Logs) -->
+        <div id="architectureView" class="hidden space-y-12 animate__animated animate__fadeIn max-w-[1600px] mx-auto">
+            <div class="border-b-4 border-teal-500 pb-6 flex justify-between items-end">
+                <div>
+                    <p class="text-teal-400 font-black uppercase tracking-widest text-sm mb-1">System Architecture</p>
+                    <h2 class="text-6xl font-black text-white italic tracking-tighter uppercase">Detect &rarr; Validate &rarr; Repair</h2>
+                </div>
+                <div class="flex gap-4 mb-1">
+                    <span class="bg-slate-800 border border-slate-700 px-3 py-1 rounded text-[10px] font-bold text-slate-400 uppercase">Imagen 4.0 Fast</span>
+                    <span class="bg-slate-800 border border-slate-700 px-3 py-1 rounded text-[10px] font-bold text-slate-400 uppercase">Gemini 2.5 Pro</span>
+                    <span class="bg-slate-800 border border-slate-700 px-3 py-1 rounded text-[10px] font-bold text-slate-400 uppercase">Gemini 2.5 Flash</span>
+                </div>
+            </div>
+
+            <!-- Evaluation Ledger Row (Cumulative Session Ledger for un-BS compliance truth) -->
+            <div class="bg-[#091124] border border-slate-800 p-6 rounded-2xl shadow-2xl space-y-4 max-w-full">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-base">📊</span>
+                        <h3 id="sessionLedgerTitle" class="text-xs font-black uppercase text-slate-300 tracking-wider">Cumulative Session Ledger (N=0)</h3>
+                        <button id="resetSessionStatsBtn" class="text-[9px] font-black text-rose-500 hover:text-rose-400 transition-colors uppercase tracking-wider ml-4 cursor-pointer">Reset Stats</button>
+                    </div>
+                    <span id="auditBadge" class="bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30 font-black uppercase text-[10px] tracking-wider">Production Ready</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <div class="space-y-1 bg-slate-950/40 p-4 rounded-xl border border-slate-900 flex flex-col justify-center">
+                        <p class="text-slate-500 font-black uppercase text-[8px] tracking-widest">First-Pass Accepts</p>
+                        <p id="statFirstPass" class="text-white font-mono text-xl font-black tabular-nums">0 / 0 (0%)</p>
+                    </div>
+                    <div class="space-y-1 bg-slate-950/40 p-4 rounded-xl border border-slate-900 flex flex-col justify-center">
+                        <p class="text-slate-500 font-black uppercase text-[8px] tracking-widest">Self-Healing Recoveries</p>
+                        <p id="statRecovery" class="text-teal-400 font-mono text-xl font-black tabular-nums">0 / 0 (0%)</p>
+                    </div>
+                    <div class="space-y-1 bg-slate-950/40 p-4 rounded-xl border border-slate-900 flex flex-col justify-center">
+                        <p class="text-slate-500 font-black uppercase text-[8px] tracking-widest">Cumulative Session Savings</p>
+                        <p id="statSessionFinancials" class="text-emerald-400 font-mono text-xl font-black tabular-nums">$0.0000 (Saved 0%)</p>
+                    </div>
+                </div>
+                <div id="failureReasonBox" class="hidden bg-rose-500/10 p-4 border border-rose-500/20 rounded-xl animate__animated animate__headShake flex-col justify-center text-center mt-4">
+                    <p class="text-rose-400 font-black uppercase text-[8px] tracking-widest mb-1.5 flex items-center gap-1.5 justify-center">
+                        <span class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-ping"></span>
+                        Production Gate Rejection
+                    </p>
+                    <p id="statFailure" class="text-rose-200 font-mono italic text-[10px] leading-tight"></p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                <!-- Swapped Left Column: Prominent ADK Event Trace Logs (8/12 cols for Track 2 Compliance Proof) -->
+                <div class="lg:col-span-8 bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl flex flex-col h-full">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-4 mb-8">
+                        <h3 class="text-xs font-black uppercase tracking-widest text-teal-400">Track 2: Complete ADK Event (Agent-to-Agent) Trace Ledger</h3>
+                        <span class="text-[9px] text-teal-500 font-mono font-bold uppercase tracking-widest">// Multi-Agent Observability Trace</span>
+                    </div>
+                    <div id="fullTraceLog" class="flex-1 font-mono text-[10px] text-blue-300 space-y-4 overflow-y-auto custom-scrollbar min-h-[500px]"></div>
+                </div>
+
+                <!-- Swapped Right Column: Diagnostics Reference (4/12 cols) -->
+                <div class="lg:col-span-4 flex flex-col gap-6 items-stretch">
+                    <!-- 1. Logical DAG Flow Reference -->
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl">
+                        <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
+                            <h3 class="text-xs font-black uppercase tracking-widest text-teal-400">Logical DAG Flow</h3>
+                            <div class="flex bg-slate-950 rounded-lg p-1 border border-slate-800">
+                                <button id="graphViewYourRun" class="px-2.5 py-1 rounded text-[8px] font-black uppercase transition-all bg-teal-500 text-slate-950 cursor-pointer">Your Run</button>
+                                <button id="graphViewFull" class="px-2.5 py-1 rounded text-[8px] font-black uppercase transition-all text-slate-400 hover:text-white ml-1 cursor-pointer">Full System</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-center p-4 bg-black/30 rounded-xl border border-white/5 shadow-inner">
+                             <div id="mermaidGraph" class="mermaid w-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Intelligent Tier-Escalation & Financial Audit Ledger -->
+                    <div id="financialLedgerCard" class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl flex-1 flex flex-col justify-between min-h-[300px]">
+                        <div>
+                            <h3 class="text-xs font-black uppercase tracking-widest text-teal-400 mb-4 border-b border-slate-800 pb-3">ADK Tier-Escalation Cost Audit</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-400 font-medium">Escalation Status</span>
+                                    <span id="escalationStatus" class="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-mono font-bold uppercase border border-emerald-500/20 text-[9px]">DORMANT (Cost Optimized)</span>
+                                </div>
+                                <div class="bg-black/35 rounded-xl border border-white/5 p-4 space-y-3 font-mono text-[10px] text-slate-300">
+                                    <div class="flex justify-between">
+                                        <span>🎨 Artist (Imagen 4.0)</span>
+                                        <span id="costArtist">$0.0300</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>🔍 Miner (Flash 2.5)</span>
+                                        <span id="costMiner">$0.0002</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>⚖️ Auditor (Flash 2.5)</span>
+                                        <span id="costAuditor">$0.0003</span>
+                                    </div>
+                                    <div class="flex justify-between" id="costPlaywrightRow">
+                                        <span class="text-slate-500">🛠️ Playwright (Pro 2.5)</span>
+                                        <span class="text-slate-500" id="costPlaywright">$0.0000 (Dormant)</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>✍️ Specialist (Flash 2.5)</span>
+                                        <span id="costSpecialist">$0.0005</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 mt-4 border-t border-slate-800 space-y-3">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-black uppercase">Total Actual Cost</span>
+                                <span id="actualTotalCost" class="text-teal-400 font-mono font-black text-sm">$0.0310</span>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-black uppercase">Monolithic Pro Cost</span>
+                                <span id="monolithicProCost" class="text-slate-500 font-mono font-black">$0.0360</span>
+                            </div>
+                            <div class="bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl flex justify-between items-center text-xs" id="savingsHighlightBox">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-base animate-pulse">💰</span>
+                                    <span class="text-emerald-400 font-black uppercase text-[10px]">Tier Savings</span>
+                                </div>
+                                <span id="tierSavingsValue" class="text-emerald-400 font-mono font-black text-xs">13.9% ($0.0050)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PAGE 4: GRC AUDIT PROOF (Hidden, accessible via Tab 3 Proof Link) -->
+        <div id="viewProof" class="hidden max-w-[1600px] mx-auto animate__animated animate__fadeIn">
+            <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl relative">
+                <div class="absolute top-4 right-4">
+                    <button id="copyProofBtn" class="bg-teal-500 text-slate-950 px-4 py-2 rounded font-black text-xs uppercase tracking-widest hover:bg-teal-400 transition-colors cursor-pointer z-10 active:scale-95">Copy to Clipboard</button>
+                </div>
+                <h3 class="text-xs font-black uppercase tracking-widest text-teal-400 mb-8 border-b border-slate-800 pb-4">Architecture Audit Proof</h3>
+                <div id="proofContentData" class="font-mono text-xs text-slate-300 whitespace-pre-wrap overflow-x-auto custom-scrollbar">{{ proof_content }}</div>
+            </div>
+        </div>
+
+    </main>
+
+
+
+    <!-- APPLICATION SCRIPTS AND DATA SOURCING -->
+    <script src="/static/js/cached_runs.js?v=3"></script>
+    <script src="/static/js/app_v2.js?v=6"></script>
+    </body>
+</html>
