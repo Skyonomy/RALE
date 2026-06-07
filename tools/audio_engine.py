@@ -50,8 +50,9 @@ class AudioEngine:
                     import google.auth
                     from google.auth.transport.requests import Request
                     
-                    # Set credentials path defensively
-                    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "google-credentials.json"
+                    # Set credentials path defensively if the file exists
+                    if os.path.exists("google-credentials.json"):
+                        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "google-credentials.json"
                     credentials, project_id = google.auth.default(scopes=["https://www.googleapis.com/auth/cloud-platform"])
                     credentials.refresh(Request())
                     
