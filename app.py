@@ -21,6 +21,9 @@ from agents.orchestrator_agent import OrchestratorAgent
 from tools.forensic_compositor import ForensicCompositor
 from tools.audio_engine import AudioEngine
 
+DEFAULT_IMAGE_PROMPT = """A professional, high-contrast, strictly 2D top-down architectural site map of: {SCENARIO}.
+Style: Clean, minimalist schematic design. High-fidelity textures with absolutely zero text, zero labels, zero letters, and zero clutter."""
+
 def create_app(test_config=None):
     app = Flask(__name__)
     
