@@ -65,8 +65,15 @@ def validate_multimodal_geometry_func(vision_proposal: Any, is_stress_test: bool
             labels = []
             script = ""
     elif isinstance(vision_proposal, dict):
-        script = vision_proposal.get('script', '')
-        labels = vision_proposal.get('labels', [])
+        # Defensive De-nesting: Handle cases where the tool argument is nested under key names
+        inner_prop = vision_proposal
+        if 'vision_proposal' in vision_proposal and isinstance(vision_proposal['vision_proposal'], dict):
+            inner_prop = vision_proposal['vision_proposal']
+        elif 'vision_result' in vision_proposal and isinstance(vision_proposal['vision_result'], dict):
+            inner_prop = vision_proposal['vision_result']
+            
+        script = inner_prop.get('script', '')
+        labels = inner_prop.get('labels', [])
     else:
         script = ""
         labels = []
