@@ -29,8 +29,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the entire project
 COPY . .
 
-# Expose the port
-EXPOSE 5050
-
-# Command to run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:5050", "--workers", "1", "--threads", "8", "--timeout", "300", "app:app"]
+# Command to run the application dynamically on Cloud Run's $PORT
+CMD gunicorn --bind 0.0.0.0:${PORT:-5050} --workers 1 --threads 8 --timeout 300 app:app
