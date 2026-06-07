@@ -13,6 +13,7 @@ let state = {
     activeGraphView: 'your_run',
     specialistTimer: null,
     specialistStepIdx: 0,
+    specialistElapsedSeconds: 0,
     specialistSteps: [
         "Structuring geographical landmark transitions...",
         "Drafting vocabulary-rich tour narration (IELTS Band 9)...",
@@ -362,32 +363,59 @@ function addTrace(agent, event, details = "") {
         }
     }
 
-    // --- OPTION A: SPECIALIST SIMULATED PROGRESS LOGS ---
-    // If a new real event is received from the DB, stop any simulated logs immediately
+    // --- OPTION A & B: SPECIALIST SIMULATED PROGRESS & DYNAMIC TELEMETRY LOADER ---
+    // If a new real event is received from the DB, stop any simulated logs and restore card immediately
     if (state.specialistTimer) {
         clearInterval(state.specialistTimer);
         state.specialistTimer = null;
+        
+        // Restore normal state of the MCQs card
+        const sumMCQs = document.getElementById('sumMCQs');
+        if (sumMCQs) {
+            sumMCQs.innerText = "5 MCQs";
+            sumMCQs.className = "text-[10px] font-black text-emerald-500 uppercase";
+        }
     }
 
     if (msgLower.includes("validated ielts mcqs")) {
+        // Option B: Show dynamic spinning loader on the Assessment card immediately
+        const sumMCQs = document.getElementById('sumMCQs');
+        if (sumMCQs) {
+            sumMCQs.innerHTML = '<span class="inline-block animate-spin mr-1">⏳</span> COMPILING...';
+            sumMCQs.className = "text-[10px] font-black text-amber-500 uppercase animate-pulse";
+        }
+
+        // Option A: Append initial yellow warning notice log
+        appendSimulatedLog("Specialist", "⚠️ NOTICE: Compiling structured IELTS assessments (500-word script + 5 MCQs) is a highly complex cognitive task. Generating and self-correcting can take up to 90 seconds. Please stand by.", "text-amber-400 font-bold");
+
         state.specialistStepIdx = 0;
+        state.specialistElapsedSeconds = 0;
+        
         state.specialistTimer = setInterval(() => {
-            if (state.specialistStepIdx < state.specialistSteps.length) {
-                const stepMsg = state.specialistSteps[state.specialistStepIdx];
-                appendSimulatedLog("Specialist", stepMsg);
-                state.specialistStepIdx++;
+            state.specialistElapsedSeconds += 2;
+            
+            // Output stopwatch tick every 2 seconds
+            if (state.specialistElapsedSeconds % 10 === 0) {
+                // Every 10 seconds, inject one of our high-fidelity, highly specialized process descriptions
+                if (state.specialistStepIdx < state.specialistSteps.length) {
+                    const stepMsg = state.specialistSteps[state.specialistStepIdx];
+                    appendSimulatedLog("Specialist", `⚙️ ${stepMsg} (${state.specialistElapsedSeconds}s elapsed)`);
+                    state.specialistStepIdx++;
+                } else {
+                    appendSimulatedLog("Specialist", `⏳ Compiling IELTS Exam & MCQs... (${state.specialistElapsedSeconds}s elapsed)`);
+                }
             } else {
-                clearInterval(state.specialistTimer);
-                state.specialistTimer = null;
+                // Simple heartbeat stopwatch tick
+                appendSimulatedLog("Specialist", `⏳ Generating IELTS Exam & MCQs... (${state.specialistElapsedSeconds}s elapsed)`);
             }
-        }, 12000); // Add a progress log every 12 seconds
+        }, 2000); // Trigger every 2 seconds!
     }
 
     updateFleetUI(agent, event);
 }
 
 // HELPER TO APPEND DECORATIVE PROGRESS LOGS DURING LONG MODEL CALLS
-function appendSimulatedLog(agent, message) {
+function appendSimulatedLog(agent, message, customTextClass = "text-slate-400 font-medium italic") {
     const formattedAgent = agent.toUpperCase();
     const formattedEvent = message;
     const timestamp = new Date().toLocaleTimeString();
@@ -398,7 +426,7 @@ function appendSimulatedLog(agent, message) {
                 <div class="flex items-center gap-2">
                     <span class="text-slate-500 font-mono">${timestamp}</span>
                     <span class="text-indigo-400 font-black uppercase text-[9px] tracking-wider">[${formattedAgent}]</span>
-                    <span class="text-slate-400 font-medium italic flex-1 leading-normal">${formattedEvent}</span>
+                    <span class="${customTextClass} flex-1 leading-normal">${formattedEvent}</span>
                 </div>
             </div>
         </div>`;
@@ -411,10 +439,10 @@ function appendSimulatedLog(agent, message) {
         fullLog.innerHTML += html;
         log.scrollTop = log.scrollHeight;
         fullLog.scrollTop = fullLog.scrollHeight;
-    }
-}
+        }
+        }
 
-// POLL SYSTEM DB LOGS FOR THE LIVE EXECUTION ROUTE
+        // POLL SYSTEM DB LOGS FOR THE LIVE EXECUTION ROUTE
 async function pollLogs() {
     try {
         const res = await fetch(`/api/trace?offset=${state.logOffset}`);
