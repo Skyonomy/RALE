@@ -500,4 +500,3 @@ class OrchestratorAgent:
         except Exception as e:
             logger.error(f"Orchestrator Logic Error: {e}")
             return {"status": "error", "message": str(e)}
-e": str(e)}
