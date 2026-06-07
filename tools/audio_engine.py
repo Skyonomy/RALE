@@ -121,13 +121,13 @@ class AudioEngine:
 
                 if tts_res.status_code != 200:
                     logger.warning(f"Google Cloud TTS Failed ({tts_res.status_code}). Falling back to Google Translate TTS...")
-                    if self._generate_translate_tts(script, filepath):
+                    if self._generate_translate_tts(trimmed_script, filepath):
                         with open(filepath, 'rb') as f:
                             audio_content = f.read()
                         audio_url = self._save_audio_content(audio_content, filename)
                     else:
                         logger.error("Translate TTS fallback failed. Triggering silent fallback.")
-                        return self._generate_fallback_karaoke(script, filename, filepath)
+                        return self._generate_fallback_karaoke(trimmed_script, filename, filepath)
                 else:
                     audio_content = base64.b64decode(tts_res.json()["audioContent"])
                     audio_url = self._save_audio_content(audio_content, filename)
