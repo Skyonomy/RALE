@@ -16,14 +16,14 @@ class ArtistAgent:
 
     def __init__(self, key_manager: KeyManager):
         self.key_manager = key_manager
-        self.client = genai.Client(api_key=self.key_manager.get_key())
+        self.client = self.key_manager.get_client()
         # Fast variant has higher quota and lower latency
         self.primary_model = "imagen-4.0-fast-generate-001"
         self.fallback_model = "imagen-4.0-fast-generate-001"
 
     def _refresh_client(self):
         """Re-instantiates the genai Client with the current key from KeyManager."""
-        self.client = genai.Client(api_key=self.key_manager.get_key())
+        self.client = self.key_manager.get_client()
 
     def generate_map(self, scenario: str, prompt_template: str) -> Dict:
         """

@@ -48,7 +48,10 @@ def create_app(test_config=None):
         from google.genai import types
         from agents.schemas import DynamicTheming
         try:
-            client = genai.Client(api_key=api_key)
+            if os.getenv("GOOGLE_GENAI_USE_VERTEXAI", "false").lower() == "true":
+                client = genai.Client()
+            else:
+                client = genai.Client(api_key=api_key)
             logger.info(f"PromptArchitect: Expanding theme for scenario '{scenario}' using Gemini 2.5 Flash")
 
             prompt = f"""You are a master theme park and architectural site planner. 

@@ -43,3 +43,17 @@ class KeyManager:
 
     def get_all_keys(self) -> List[str]:
         return self.keys
+
+    def get_client(self):
+        """
+        Creates and returns a genai.Client instance.
+        If GOOGLE_GENAI_USE_VERTEXAI is set to 'true', it initializes in Vertex AI mode
+        using Application Default Credentials (ADC) on Google Cloud (e.g. Cloud Run service account).
+        Otherwise, it falls back to the current local API key from KeyManager.
+        """
+        from google import genai
+        if os.getenv("GOOGLE_GENAI_USE_VERTEXAI", "false").lower() == "true":
+            logger.info("KeyManager: Initializing genai.Client in Vertex AI mode using ADC.")
+            return genai.Client()
+        else:
+            return genai.Client(api_key=self.get_key())

@@ -395,8 +395,11 @@ class OrchestratorAgent:
                     import os
                     import json
                     
-                    km = config.get('api_key') or os.environ.get("GOOGLE_API_KEY")
-                    client = genai.Client(api_key=km)
+                    if os.getenv("GOOGLE_GENAI_USE_VERTEXAI", "false").lower() == "true":
+                        client = genai.Client()
+                    else:
+                        km = config.get('api_key') or os.environ.get("GOOGLE_API_KEY")
+                        client = genai.Client(api_key=km)
                     
                     mqa_prompt = f"""You are a strict GRC Multimodal Quality Assurance (MQA) Reviewer auditing a generated top-down 2D site map of: {scenario}.
                     
@@ -497,3 +500,4 @@ class OrchestratorAgent:
         except Exception as e:
             logger.error(f"Orchestrator Logic Error: {e}")
             return {"status": "error", "message": str(e)}
+e": str(e)}

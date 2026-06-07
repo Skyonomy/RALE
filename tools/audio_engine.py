@@ -26,7 +26,7 @@ class AudioEngine:
 
     def _refresh_client(self):
         """Re-instantiates the genai Client with the current key from KeyManager."""
-        self.client = genai.Client(api_key=self.key_manager.get_key())
+        self.client = self.key_manager.get_client()
 
     def generate_karaoke_audio(self, script: str) -> Dict:
         """
