@@ -1,8 +1,9 @@
 import os
 import json
 import logging
+import getpass
 from datetime import datetime
-from sqlalchemy import create_engine, Column, String, Boolean, Integer, DateTime, Text
+from sqlalchemy import create_engine, Column, String, Boolean, Integer, DateTime, Text, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 logger = logging.getLogger(__name__)
@@ -10,7 +11,72 @@ logger = logging.getLogger(__name__)
 # Determine Database URL (Default to ephemeral SQLite if not defined, otherwise Cloud SQL)
 DB_URL = os.environ.get("POSTGRES_URL", "sqlite:///" + os.path.join(os.path.dirname(__file__), 'data', 'adk_state.db'))
 
-engine = create_engine(DB_URL, pool_pre_ping=True)
+# --- DIAGNOSTIC CHECKS ---
+def run_db_diagnostics():
+    try:
+        resolved_path = DB_URL.replace("sqlite:///", "") if "sqlite" in DB_URL else "PostgreSQL Server"
+        uid = os.getuid()
+        user = getpass.getuser()
+        
+        logger.info("=== DB DIAGNOSTICS ===")
+        logger.info(f"Resolved DB Connection String: {DB_URL}")
+        logger.info(f"Resolved absolute DB path: {resolved_path}")
+        logger.info(f"Current Process User: {user} (UID: {uid})")
+        
+        if "sqlite" in DB_URL:
+            db_exists = os.path.exists(resolved_path)
+            db_writable = os.access(resolved_path, os.W_OK) if db_exists else "N/A (File does not exist yet)"
+            logger.info(f"DB File exists: {db_exists}")
+            logger.info(f"DB File is writable: {db_writable}")
+            
+            parent_dir = os.path.dirname(resolved_path)
+            parent_exists = os.path.exists(parent_dir)
+            parent_writable = os.access(parent_dir, os.W_OK) if parent_exists else False
+            logger.info(f"Parent data directory exists: {parent_exists}")
+            logger.info(f"Parent data directory is writable: {parent_writable}")
+        logger.info("======================")
+    except Exception as e:
+        logger.error(f"Error executing DB diagnostics: {e}")
+
+# Run diagnostics at module import
+run_db_diagnostics()
+
+# Create Engine with hardened SQLite connection arguments if SQLite is used
+if "sqlite" in DB_URL:
+    engine = create_engine(
+        DB_URL,
+        connect_args={
+            "check_same_thread": False,
+            "timeout": 30,
+        },
+        pool_pre_ping=True,
+    )
+    
+    @event.listens_for(engine, "connect")
+    def set_sqlite_pragma(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL;")
+        cursor.execute("PRAGMA synchronous=NORMAL;")
+        cursor.execute("PRAGMA busy_timeout=30000;")
+        
+        # Log pragmas as requested
+        cursor.execute("PRAGMA database_list;")
+        db_list = cursor.fetchall()
+        cursor.execute("PRAGMA journal_mode;")
+        j_mode = cursor.fetchone()
+        cursor.execute("PRAGMA synchronous;")
+        sync = cursor.fetchone()
+        
+        logger.info(f"=== CONNECTED SQLite PRAGMAS ===")
+        logger.info(f"PRAGMA database_list: {db_list}")
+        logger.info(f"PRAGMA journal_mode: {j_mode}")
+        logger.info(f"PRAGMA synchronous: {sync}")
+        logger.info(f"=================================")
+        
+        cursor.close()
+else:
+    engine = create_engine(DB_URL, pool_pre_ping=True)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
@@ -50,7 +116,8 @@ class ValidationAttempt(Base):
 
 def init_db():
     if "sqlite" in DB_URL:
-        os.makedirs(os.path.dirname(DB_URL.replace("sqlite:///", "")), exist_ok=True)
+        resolved_path = DB_URL.replace("sqlite:///", "")
+        os.makedirs(os.path.dirname(resolved_path), exist_ok=True)
     Base.metadata.create_all(bind=engine)
     logger.info(f"Database initialized: {DB_URL}")
 
