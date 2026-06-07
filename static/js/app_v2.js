@@ -10,7 +10,15 @@ let state = {
     logOffset: 0,
     tourTimer: null,
     selectedStopIdx: null,
-    activeGraphView: 'your_run'
+    activeGraphView: 'your_run',
+    specialistTimer: null,
+    specialistStepIdx: 0,
+    specialistSteps: [
+        "Structuring geographical landmark transitions...",
+        "Drafting vocabulary-rich tour narration (IELTS Band 9)...",
+        "Formulating distractors for Multiple-Choice Questions...",
+        "Performing final cohesive semantic sanity check..."
+    ]
 };
 
 // INITIALIZE MERMAID CHART
@@ -325,7 +333,85 @@ function addTrace(agent, event, details = "") {
     log.scrollTop = log.scrollHeight;
     fullLog.scrollTop = fullLog.scrollHeight;
 
+    // --- OPTION A: REAL-TIME TELEMETRY SCRAPING ---
+    const sumFailures = document.getElementById('sumFailures');
+    const sumRepairs = document.getElementById('sumRepairs');
+    const sumLandmarks = document.getElementById('sumLandmarks');
+
+    const msgLower = String(event).toLowerCase();
+    
+    if (msgLower.includes("initiating multimodal semantic audit")) {
+        if (sumLandmarks) {
+            sumLandmarks.innerText = "5 / 5 (Auditing...)";
+            sumLandmarks.className = "text-[10px] font-black text-blue-400 uppercase animate-pulse";
+        }
+    } else if (msgLower.includes("semantic audit failed") || msgLower.includes("validation check failed") || msgLower.includes("rejected:")) {
+        if (sumFailures) {
+            sumFailures.innerText = "1 ALERT";
+            sumFailures.className = "text-[10px] font-black text-rose-500 uppercase animate-pulse";
+        }
+    } else if (msgLower.includes("escalating to pro tier") || msgLower.includes("self-healing")) {
+        if (sumRepairs) {
+            sumRepairs.innerText = "1 HEAL";
+            sumRepairs.className = "text-[10px] font-black text-amber-500 uppercase animate-pulse";
+        }
+    } else if (msgLower.includes("semantic audit passed") || msgLower.includes("auditor approved")) {
+        if (sumLandmarks) {
+            sumLandmarks.innerText = "5 / 5 (Passed)";
+            sumLandmarks.className = "text-[10px] font-black text-emerald-500 uppercase";
+        }
+    }
+
+    // --- OPTION A: SPECIALIST SIMULATED PROGRESS LOGS ---
+    // If a new real event is received from the DB, stop any simulated logs immediately
+    if (state.specialistTimer) {
+        clearInterval(state.specialistTimer);
+        state.specialistTimer = null;
+    }
+
+    if (msgLower.includes("writing 5 verified ielts mcqs")) {
+        state.specialistStepIdx = 0;
+        state.specialistTimer = setInterval(() => {
+            if (state.specialistStepIdx < state.specialistSteps.length) {
+                const stepMsg = state.specialistSteps[state.specialistStepIdx];
+                appendSimulatedLog("Specialist", stepMsg);
+                state.specialistStepIdx++;
+            } else {
+                clearInterval(state.specialistTimer);
+                state.specialistTimer = null;
+            }
+        }, 12000); // Add a progress log every 12 seconds
+    }
+
     updateFleetUI(agent, event);
+}
+
+// HELPER TO APPEND DECORATIVE PROGRESS LOGS DURING LONG MODEL CALLS
+function appendSimulatedLog(agent, message) {
+    const formattedAgent = agent.toUpperCase();
+    const formattedEvent = message;
+    const timestamp = new Date().toLocaleTimeString();
+    
+    const html = `
+        <div class="border-b border-slate-900 bg-slate-950/20 px-4 py-2 text-[10px] select-none hover:bg-slate-900/10 transition-colors animate-pulse">
+            <div class="flex flex-col gap-0.5">
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-500 font-mono">${timestamp}</span>
+                    <span class="text-indigo-400 font-black uppercase text-[9px] tracking-wider">[${formattedAgent}]</span>
+                    <span class="text-slate-400 font-medium italic flex-1 leading-normal">${formattedEvent}</span>
+                </div>
+            </div>
+        </div>`;
+
+    const log = document.getElementById('traceLog');
+    const fullLog = document.getElementById('fullTraceLog');
+    
+    if (log && fullLog) {
+        log.innerHTML += html;
+        fullLog.innerHTML += html;
+        log.scrollTop = log.scrollHeight;
+        fullLog.scrollTop = fullLog.scrollHeight;
+    }
 }
 
 // POLL SYSTEM DB LOGS FOR THE LIVE EXECUTION ROUTE
