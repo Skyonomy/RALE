@@ -13,10 +13,10 @@ class MinerAgent:
 
     def __init__(self, key_manager):
         self.key_manager = key_manager
-        # Stable 1.5 Flash for guaranteed availability and speed
+        # Stable 2.5 Flash for guaranteed availability and speed
         self.adk_agent = Agent(
             name="miner_agent",
-            model="gemini-flash-latest",
+            model="gemini-2.5-flash",
             instruction=(
                 "You are a precision vision extraction agent. Your task is to analyze "
                 "architectural schematics and extract 1000x1000 coordinates. "
