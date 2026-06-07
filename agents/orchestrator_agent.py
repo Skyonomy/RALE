@@ -2,7 +2,6 @@ import logging
 import asyncio
 import json
 import uuid
-import sqlite3
 from typing import Dict, List, Optional, Any, AsyncGenerator
 from google.genai import types
 from pydantic import BaseModel, Field, ValidationError
@@ -71,16 +70,21 @@ class AuditorNode(BaseNode):
         # 2. Check for tool rejections first (from previous agent's function calls)
         tool_rejection = None
         try:
-            conn = sqlite3.connect(database.DB_PATH, timeout=10)
-            cursor = conn.cursor()
-            cursor.execute("SELECT function_response FROM adk_events WHERE run_id=? AND function_response IS NOT NULL AND function_response != '' ORDER BY id DESC LIMIT 1", (self.run_id,))
-            row = cursor.fetchone()
-            conn.close()
-            
-            if row and row[0]:
-                res_dict = json.loads(row[0])
-                if isinstance(res_dict, dict) and res_dict.get('status') == 'REJECTED':
-                    tool_rejection = res_dict.get('message')
+            db = database.SessionLocal()
+            try:
+                # Query for the latest function_response for this run_id
+                latest_event = db.query(database.ADKEvent).filter(
+                    database.ADKEvent.run_id == self.run_id,
+                    database.ADKEvent.function_response != None,
+                    database.ADKEvent.function_response != ''
+                ).order_by(database.ADKEvent.id.desc()).first()
+                
+                if latest_event and latest_event.function_response:
+                    res_dict = json.loads(latest_event.function_response)
+                    if isinstance(res_dict, dict) and res_dict.get('status') == 'REJECTED':
+                        tool_rejection = res_dict.get('message')
+            finally:
+                db.close()
         except Exception as e:
             logger.warning(f"AuditorNode: Error checking tool responses: {e}")
 
@@ -332,35 +336,7 @@ class OrchestratorAgent:
                         final_data.update(event.actions.state_delta['specialist_result'])
 
         # Let's query the database to find the first validation attempt and initial metrics
-        first_pass_rejection_reason = "NONE"
-        first_pass_metrics = {"word_count": 0, "anchor_count": 0}
-        
-        try:
-            conn = sqlite3.connect(database.DB_PATH, timeout=10)
-            cursor = conn.cursor()
-            
-            # Find first rejection reason (if any)
-            cursor.execute("SELECT error_message FROM validation_attempts WHERE run_id = ? AND status = 'REJECTED' ORDER BY attempt_number ASC LIMIT 1", (run_id,))
-            row = cursor.fetchone()
-            if row:
-                first_pass_rejection_reason = row[0]
-                
-            # Parse the first miner_agent function call arguments to count first-pass words/anchors
-            cursor.execute("SELECT function_call_args FROM adk_events WHERE run_id = ? AND author = 'miner_agent' AND function_call_args IS NOT NULL AND function_call_args != '' ORDER BY id ASC LIMIT 1", (run_id,))
-            row_ev = cursor.fetchone()
-            if row_ev and row_ev[0]:
-                try:
-                    p = json.loads(row_ev[0])
-                    prop = p.get('vision_proposal', {})
-                    scr = prop.get('script', '')
-                    lbls = prop.get('labels', [])
-                    first_pass_metrics["word_count"] = len(scr.split())
-                    first_pass_metrics["anchor_count"] = len(lbls)
-                except Exception as ex:
-                    logger.debug(f"Error parsing miner event for metrics: {ex}")
-            conn.close()
-        except Exception as e:
-            logger.warning(f"Error gathering first pass metrics: {e}")
+        first_pass_rejection_reason, first_pass_metrics = database.get_first_pass_metrics(run_id)
 
         if audit_failed_reason:
             database.update_run(run_id, "FAILED", False, recovery_triggered)

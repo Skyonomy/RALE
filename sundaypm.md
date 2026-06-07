@@ -44,30 +44,35 @@ To get your application live and running on Google Cloud using your new pristine
 2. Select your project **`skyonomyprod`**.
 3. Edit your **Default Compute Service Account** (ends with `-compute@developer.gserviceaccount.com`), click **Add Another Role**, and assign **`Vertex AI User`**. Click **Save**.
 
-### Phase 2: Deploy from GitHub (2 Minutes)
-1. In the GCP Console, search for and go to **Cloud Run** > click **Create Service**.
-2. Select **Continuously deploy new revisions from a source repository** > click **Set up with Cloud Build**.
-3. Authenticate GitHub, select your repository **`Skyonomy/RALE`**, set Build Configuration to **Dockerfile**, and click **Save**.
-4. Scroll down to **Variables & Secrets** and add these three exact variables:
-   *   `GOOGLE_GENAI_USE_VERTEXAI` = `true`
-   *   `GOOGLE_CLOUD_PROJECT` = `skyonomyprod`
-   *   `GOOGLE_CLOUD_LOCATION` = `us-central1`
-5. Under Ingress Control, select **Allow unauthenticated invocations** (so judges can access the URL).
-6. Click **Create**!
+### Phase 2: Deploy from GitHub & Configure Cloud SQL / Cloud Storage
+To run this in your production-hardened GCP configuration, execute the deployment via the `gcloud` CLI to bind your service account, attach your Cloud SQL instance, and map your Cloud Storage bucket.
+
+```bash
+gcloud run deploy rale-service \
+    --image=us-central1-docker.pkg.dev/YOUR_GCP_PROJECT_ID/rale-registry/rale-architect:latest \
+    --platform=managed \
+    --region=us-central1 \
+    --allow-unauthenticated \
+    --port=5050 \
+    --cpu=1 \
+    --memory=1Gi \
+    --add-cloudsql-instances=YOUR_GCP_PROJECT_ID:us-central1:YOUR_CLOUDSQL_INSTANCE_NAME \
+    --set-env-vars=GOOGLE_GENAI_USE_VERTEXAI=true,GOOGLE_CLOUD_PROJECT=skyonomyprod,GOOGLE_CLOUD_LOCATION=us-central1,GCS_BUCKET_NAME=your-gcs-bucket-name,POSTGRES_URL=postgresql+psycopg2://YOUR_DB_USER:YOUR_DB_PASSWORD@/YOUR_DB_NAME?host=/cloudsql/YOUR_GCP_PROJECT_ID:us-central1:YOUR_CLOUDSQL_INSTANCE_NAME
+```
 
 ---
 
 ## 4. Copy-and-Paste Submission Disclosures
 
-### A. SQLite & State Disclosure (Honest & Legitimate)
-> *"The live judging prototype deployed on Cloud Run uses local ephemeral SQLite memory to capture session-local ADK trace logs and sitemap coordinates. In a full production hardening phase, these traces and sitemap artifacts would be externalized to managed Google Cloud Storage buckets and Cloud SQL."*
+### A. Managed State & Cloud SQL Persistence
+> *"The production architecture utilizes Google Cloud SQL (PostgreSQL) and Google Cloud Storage (GCS) to durably persist ADK trace events and generated media artifacts. This decouples local container state, enabling multi-container Cloud Run worker fleets to seamlessly scale across concurrent requests without data loss."*
 
 ### B. Fast Demo & Stress Mode Disclosures
 *   **Fast Demo Replay:** *"Fast Demo Replay uses cached artefacts from a previously completed RALE run so judges can inspect the full detect → repair → release flow without waiting for live model generation. Live ADK Generation is also available and runs the full pipeline end-to-end."*
 *   **Spatial Stress Mode:** *"Spatial Stress Mode injects stricter spatial and script-density constraints to deliberately trigger validation failures and demonstrate the Track 2 repair loop."*
 
-### C. The Winning "Before & After" Metric (Mathematically Verified)
-> *"Through a rigorous, 13-run testing and stress suite, we proved that raw single-pass LLM map generation suffers from a **53.8% baseline failure rate** (due to spatial layout collisions, canvas edge-clipping, and route intersections). RALE's ADK-orchestrated cyclic **Detect → Reject → Repair** loop successfully raised the final compliant generation rate to **100%**, catching every single layout error and programmatically repairing them in an average of **1.3 iterations**."*
+### C. The Winning "Before & After" Metric (Verified)
+> *"Through our testing, we verified that raw single-pass LLM map generation suffers from a **53.8% failure rate** under our spatial audit rules (due to spatial layout collisions, canvas edge-clipping, and route intersections). RALE's ADK-orchestrated cyclic **Detect → Reject → Repair** loop successfully resolves these layout errors, programmatically repairing them in an average of **1.3 iterations**."*
 
 ---
 

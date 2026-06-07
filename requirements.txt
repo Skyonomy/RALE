@@ -3,5 +3,9 @@ google-genai==1.75.0
 google-adk==2.1.0
 requests==2.34.2
 Pillow==10.3.0
-python-dotenv==1.0.1
 gunicorn==21.2.0
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.30
+google-cloud-storage==2.16.0
+google-cloud-secret-manager==2.20.0
+google-cloud-logging==3.10.0

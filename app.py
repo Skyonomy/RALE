@@ -248,7 +248,7 @@ def create_app(test_config=None):
                 "teacher_image_b64": teacher_b64,
                 "vision_result": result['vision_result'],
                 "questions": result['vision_result'].get('questions', []),
-                "audio_url": f"/static/uploads/{audio_res['audio_filename']}" if audio_res.get('status') == 'success' else "",
+                "audio_url": audio_res.get('audio_url', "") if audio_res.get('status') == 'success' else "",
                 "words": audio_res.get('words', []),
                 "audit": {
                     "passed": result['audit_passed'],
@@ -340,16 +340,28 @@ def create_app(test_config=None):
                         'Duration_Seconds'
                     ])
                 
+                first_pass_words = data.get('firstPassWords', 0)
+                first_pass_anchors = data.get('firstPassAnchors', 0)
+                final_words = data.get('finalWords', 0)
+                final_anchors = data.get('finalAnchors', 0)
+                
+                # If no recovery was triggered (successful first-pass run), ensure metrics are matched and not logged as 0
+                if not data.get('recoveryTriggered', False):
+                    if first_pass_words == 0:
+                        first_pass_words = final_words
+                    if first_pass_anchors == 0:
+                        first_pass_anchors = final_anchors
+
                 writer.writerow([
                     data.get('mode', 'NORMAL'),
                     data.get('scenario', 'Unknown'),
-                    data.get('firstPassWords', 0),
-                    data.get('firstPassAnchors', 0),
+                    first_pass_words,
+                    first_pass_anchors,
                     'FAIL' if data.get('recoveryTriggered') else 'PASS',
                     data.get('rejectionReason', 'NONE'),
                     data.get('recoveryTriggered', False),
-                    data.get('finalWords', 0),
-                    data.get('finalAnchors', 0),
+                    final_words,
+                    final_anchors,
                     'SUCCESS',
                     data.get('failureType', 'NONE'),
                     data.get('duration', 0)

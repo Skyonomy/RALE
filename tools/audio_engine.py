@@ -16,13 +16,47 @@ class AudioEngine:
     """
     The Audio Engine: Manages TTS synthesis via Google Cloud TTS and 
     forensic word-alignment via Gemini 2.5 Flash Multimodal.
+    Uploads audio to Google Cloud Storage if configured, else fallback local.
     """
 
     def __init__(self, key_manager: KeyManager, upload_dir: str):
         self.key_manager = key_manager
         self.upload_dir = upload_dir
+        self.gcs_bucket_name = os.environ.get("GCS_BUCKET_NAME")
+        
+        # Initialize GCS Client if bucket is defined
+        self.storage_client = None
+        self.bucket = None
+        if self.gcs_bucket_name:
+            try:
+                from google.cloud import storage
+                self.storage_client = storage.Client()
+                self.bucket = self.storage_client.bucket(self.gcs_bucket_name)
+                logger.info(f"AudioEngine: Initialized with Google Cloud Storage bucket: {self.gcs_bucket_name}")
+            except Exception as e:
+                logger.error(f"AudioEngine: Failed to initialize GCS client: {e}. Falling back to local storage.")
+                self.gcs_bucket_name = None
+                
         self._refresh_client()
-        os.makedirs(self.upload_dir, exist_ok=True)
+        if not self.gcs_bucket_name:
+            os.makedirs(self.upload_dir, exist_ok=True)
+
+    def _save_audio_content(self, audio_content: bytes, filename: str) -> str:
+        """Saves audio to GCS if configured, else saves locally. Returns public URL or local path."""
+        if self.gcs_bucket_name and self.bucket:
+            try:
+                blob = self.bucket.blob(f"audio/{filename}")
+                blob.upload_from_string(audio_content, content_type="audio/mp3")
+                # Make public if required, or return signed URL in a real app. Returning public URL for now.
+                return f"https://storage.googleapis.com/{self.gcs_bucket_name}/audio/{filename}"
+            except Exception as e:
+                logger.error(f"AudioEngine: GCS upload failed: {e}. Falling back to local.")
+        
+        # Local Fallback
+        filepath = os.path.join(self.upload_dir, filename)
+        with open(filepath, 'wb') as f:
+            f.write(audio_content)
+        return f"/static/uploads/{filename}"
 
     def _refresh_client(self):
         """Re-instantiates the genai Client with the current key from KeyManager."""
@@ -39,6 +73,7 @@ class AudioEngine:
 
         filename = f"audio_{uuid.uuid4().hex[:8]}.mp3"
         filepath = os.path.join(self.upload_dir, filename)
+        audio_url = ""
 
         max_retries = 3
         base_delay = 2
@@ -89,13 +124,13 @@ class AudioEngine:
                     if self._generate_translate_tts(script, filepath):
                         with open(filepath, 'rb') as f:
                             audio_content = f.read()
+                        audio_url = self._save_audio_content(audio_content, filename)
                     else:
                         logger.error("Translate TTS fallback failed. Triggering silent fallback.")
                         return self._generate_fallback_karaoke(script, filename, filepath)
                 else:
                     audio_content = base64.b64decode(tts_res.json()["audioContent"])
-                    with open(filepath, 'wb') as f:
-                        f.write(audio_content)
+                    audio_url = self._save_audio_content(audio_content, filename)
 
                 # 2. Gemini Multimodal Word Alignment (Karaoke)
                 logger.info("AudioEngine: Requesting word alignment from Gemini 2.5 Flash...")
@@ -138,6 +173,7 @@ class AudioEngine:
                 return {
                     "status": "success",
                     "audio_filename": filename,
+                    "audio_url": audio_url,
                     "words": words
                 }
 
