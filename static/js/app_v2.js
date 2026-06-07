@@ -1431,6 +1431,55 @@ document.getElementById('tabArchitecture').onclick = () => {
     }
 };
 
+function syncInputControls() {
+    const activeRadio = document.querySelector('input[name="scenarioType"]:checked').value;
+    const ffToggle = document.getElementById('fastForwardToggle');
+    const ffContainer = document.getElementById('fastForwardContainer');
+    const stressToggle = document.getElementById('stressTestToggle');
+    const stressCard = stressToggle ? stressToggle.closest('.p-4') : null;
+
+    if (!ffToggle || !stressToggle) return;
+
+    if (activeRadio === 'custom') {
+        // Custom prompts can never use Fast-Forward Replay
+        ffToggle.checked = false;
+        ffToggle.disabled = true;
+        if (ffContainer) ffContainer.classList.add('opacity-40', 'pointer-events-none');
+
+        // Enable Stress Test for custom prompts
+        stressToggle.disabled = false;
+        if (stressCard) stressCard.classList.remove('opacity-40', 'pointer-events-none');
+    } else {
+        // Predefined Active
+        if (stressToggle.checked) {
+            // If Stress is checked, Fast-Forward must be disabled and unchecked
+            ffToggle.checked = false;
+            ffToggle.disabled = true;
+            if (ffContainer) ffContainer.classList.add('opacity-40', 'pointer-events-none');
+
+            // Keep Stress enabled
+            stressToggle.disabled = false;
+            if (stressCard) stressCard.classList.remove('opacity-40', 'pointer-events-none');
+        } else if (ffToggle.checked) {
+            // If Fast-Forward is checked, Stress must be disabled and unchecked
+            stressToggle.checked = false;
+            stressToggle.disabled = true;
+            if (stressCard) stressCard.classList.add('opacity-40', 'pointer-events-none');
+
+            // Keep Fast-Forward enabled
+            ffToggle.disabled = false;
+            if (ffContainer) ffContainer.classList.remove('opacity-40', 'pointer-events-none');
+        } else {
+            // Neither is checked: both are enabled and clickable
+            ffToggle.disabled = false;
+            if (ffContainer) ffContainer.classList.remove('opacity-40', 'pointer-events-none');
+
+            stressToggle.disabled = false;
+            if (stressCard) stressCard.classList.remove('opacity-40', 'pointer-events-none');
+        }
+    }
+}
+
 function updateScenarioSelectionState() {
     const predefinedCard = document.getElementById('optionPredefinedCard');
     const customCard = document.getElementById('optionCustomCard');
@@ -1440,6 +1489,7 @@ function updateScenarioSelectionState() {
     
     const ffToggle = document.getElementById('fastForwardToggle');
     const ffContainer = document.getElementById('fastForwardContainer');
+    const stressToggle = document.getElementById('stressTestToggle');
 
     if (activeRadio === 'predefined') {
         // Predefined Active
@@ -1454,13 +1504,15 @@ function updateScenarioSelectionState() {
         inputEl.disabled = true;
         inputEl.classList.add('opacity-50');
 
-        // Enable and pre-check Fast-Forward by default (judges get instant results)
+        // Enable and pre-check Fast-Forward by default only if Stress is NOT active
         if (ffToggle) {
-            ffToggle.disabled = false;
-            ffToggle.checked = true;
-        }
-        if (ffContainer) {
-            ffContainer.classList.remove('opacity-40', 'pointer-events-none');
+            if (stressToggle && stressToggle.checked) {
+                ffToggle.checked = false;
+                ffToggle.disabled = true;
+            } else {
+                ffToggle.disabled = false;
+                ffToggle.checked = true;
+            }
         }
     } else {
         // Custom Active
@@ -1474,16 +1526,10 @@ function updateScenarioSelectionState() {
         predefinedCard.classList.remove('bg-slate-950', 'border-teal-500/80', 'border-2');
         selectEl.disabled = true;
         selectEl.classList.add('opacity-50');
-
-        // Disable and grey out Fast-Forward for custom prompts
-        if (ffToggle) {
-            ffToggle.checked = false;
-            ffToggle.disabled = true;
-        }
-        if (ffContainer) {
-            ffContainer.classList.add('opacity-40', 'pointer-events-none');
-        }
     }
+
+    // Run the unified state synchronizer
+    syncInputControls();
 }
 
 // Attach change event to radio elements
@@ -1514,46 +1560,20 @@ updateScenarioSelectionState();
 // Link Spatial Stress Mode and Demo Fast-Forward to be mutually exclusive with clean grey-out
 const stressToggle = document.getElementById('stressTestToggle');
 const ffToggle = document.getElementById('fastForwardToggle');
-const ffContainer = document.getElementById('fastForwardContainer');
 
 if (stressToggle && ffToggle) {
     stressToggle.addEventListener('change', () => {
         if (stressToggle.checked) {
-            // Uncheck, disable, and grey-out Fast-Forward
             ffToggle.checked = false;
-            ffToggle.disabled = true;
-            if (ffContainer) {
-                ffContainer.classList.add('opacity-40', 'pointer-events-none');
-            }
-        } else {
-            // Enable Fast-Forward only if predefined is selected
-            const activeRadio = document.querySelector('input[name="scenarioType"]:checked').value;
-            if (activeRadio === 'predefined') {
-                ffToggle.disabled = false;
-                if (ffContainer) {
-                    ffContainer.classList.remove('opacity-40', 'pointer-events-none');
-                }
-            }
         }
+        syncInputControls();
     });
 
     ffToggle.addEventListener('change', () => {
         if (ffToggle.checked) {
-            // Uncheck, disable, and grey-out Stress Test
             stressToggle.checked = false;
-            stressToggle.disabled = true;
-            const stressCard = stressToggle.closest('.p-4');
-            if (stressCard) {
-                stressCard.classList.add('opacity-40', 'pointer-events-none');
-            }
-        } else {
-            // Enable Stress Test
-            stressToggle.disabled = false;
-            const stressCard = stressToggle.closest('.p-4');
-            if (stressCard) {
-                stressCard.classList.remove('opacity-40', 'pointer-events-none');
-            }
         }
+        syncInputControls();
     });
 }
 
