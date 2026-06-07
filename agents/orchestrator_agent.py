@@ -229,7 +229,8 @@ class OrchestratorAgent:
             session_id=session_id,
             state={
                 "config": config,
-                "image_binary": base64.b64encode(image_binary).decode('utf-8')
+                "image_binary": base64.b64encode(image_binary).decode('utf-8'),
+                "scenario": scenario
             }
         )
 
