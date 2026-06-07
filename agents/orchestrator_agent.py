@@ -79,11 +79,20 @@ class AuditorNode(BaseNode):
                 yield Event(actions=EventActions(route="FAILED"), output=tool_rejection)
             else:
                 database.log_custom_event(self.run_id, "Auditor", "🔄 Escalating to Pro Tier. Triggering Playwright self-healing coordinate repair...")
-                # Package both error and original script!
+                # Package both error, original script, and the image bytes for multimodal visual repair!
                 orig_script = proposal.script if proposal else ""
                 orig_labels = proposal.model_dump_json() if proposal else ""
                 rejection_package = f"Error: {tool_rejection}\nOriginal Script: {orig_script}\nOriginal Labels: {orig_labels}"
-                yield Event(actions=EventActions(route="REJECTED"), output=rejection_package)
+                
+                image_binary_b64 = ctx.session.state.get('image_binary')
+                if image_binary_b64:
+                    import base64
+                    from google.genai import types
+                    img_bytes = base64.b64decode(image_binary_b64.encode('utf-8'))
+                    image_part = types.Part.from_bytes(data=img_bytes, mime_type="image/png")
+                    yield Event(actions=EventActions(route="REJECTED"), output=[rejection_package, image_part])
+                else:
+                    yield Event(actions=EventActions(route="REJECTED"), output=rejection_package)
             return
 
         # 3. Perform geometric and route audits
@@ -171,7 +180,16 @@ Strictly output a JSON matching this schema:
                     else:
                         database.log_custom_event(self.run_id, "Auditor", "🔄 Escalating to Pro Tier. Triggering Playwright self-healing coordinate repair...")
                         rejection_package = f"Error: {semantic_error_msg}\nOriginal Script: {proposal.script}\nOriginal Labels: {proposal.model_dump_json()}"
-                        yield Event(actions=EventActions(route="REJECTED"), output=rejection_package)
+                        
+                        image_binary_b64 = ctx.session.state.get('image_binary')
+                        if image_binary_b64:
+                            import base64
+                            from google.genai import types
+                            img_bytes = base64.b64decode(image_binary_b64.encode('utf-8'))
+                            image_part = types.Part.from_bytes(data=img_bytes, mime_type="image/png")
+                            yield Event(actions=EventActions(route="REJECTED"), output=[rejection_package, image_part])
+                        else:
+                            yield Event(actions=EventActions(route="REJECTED"), output=rejection_package)
                 else:
                     database.log_validation_attempt(self.run_id, self.attempt, "PASSED", "")
                     database.log_custom_event(self.run_id, "Auditor", "✅ PASSED: All visual, geometric, and semantic GRC constraints cleared! Routing to Specialist.")
