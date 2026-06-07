@@ -1,0 +1,10 @@
+.env
+*.env
+google-credentials.json
+*credentials*.json
+.git
+.venv
+venv
+data/
+*.pyc
+__pycache__/
