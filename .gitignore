@@ -1,8 +1,11 @@
 .env
-.venv/
+*.env
+google-credentials.json
+*credentials*.json
+*service-account*.json
+data/
 venv/
+.venv/
 __pycache__/
 *.pyc
-data/
-google-credentials.json
 .DS_Store
