@@ -19,3 +19,7 @@ This repository is tailored for Track 2 of the Google for Startups AI Agents Cha
 2. Run `docker build -t rale-architect .`
 3. Run `docker run -p 5050:5050 --env-file .env rale-architect`
 4. Visit `http://localhost:5050`
+
+## State & Telemetry Disclosure
+"The Cloud Run judging demo uses ephemeral SQLite for session-local ADK trace capture and fast live observability. The core detect → validate → repair workflow runs end-to-end. Production persistence for Gradence would externalize traces and generated artefacts to managed Google Cloud services such as Cloud SQL and Cloud Storage."
+
