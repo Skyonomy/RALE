@@ -1425,6 +1425,52 @@ document.getElementById('optionCustomCard').addEventListener('click', function(e
 // Initialize on load to synchronize correct states
 updateScenarioSelectionState();
 
+// Link Spatial Stress Mode and Demo Fast-Forward to be mutually exclusive with clean grey-out
+const stressToggle = document.getElementById('stressTestToggle');
+const ffToggle = document.getElementById('fastForwardToggle');
+const ffContainer = document.getElementById('fastForwardContainer');
+
+if (stressToggle && ffToggle) {
+    stressToggle.addEventListener('change', () => {
+        if (stressToggle.checked) {
+            // Uncheck, disable, and grey-out Fast-Forward
+            ffToggle.checked = false;
+            ffToggle.disabled = true;
+            if (ffContainer) {
+                ffContainer.classList.add('opacity-40', 'pointer-events-none');
+            }
+        } else {
+            // Enable Fast-Forward only if predefined is selected
+            const activeRadio = document.querySelector('input[name="scenarioType"]:checked').value;
+            if (activeRadio === 'predefined') {
+                ffToggle.disabled = false;
+                if (ffContainer) {
+                    ffContainer.classList.remove('opacity-40', 'pointer-events-none');
+                }
+            }
+        }
+    });
+
+    ffToggle.addEventListener('change', () => {
+        if (ffToggle.checked) {
+            // Uncheck, disable, and grey-out Stress Test
+            stressToggle.checked = false;
+            stressToggle.disabled = true;
+            const stressCard = stressToggle.closest('.p-4');
+            if (stressCard) {
+                stressCard.classList.add('opacity-40', 'pointer-events-none');
+            }
+        } else {
+            // Enable Stress Test
+            stressToggle.disabled = false;
+            const stressCard = stressToggle.closest('.p-4');
+            if (stressCard) {
+                stressCard.classList.remove('opacity-40', 'pointer-events-none');
+            }
+        }
+    });
+}
+
 document.getElementById('copyProofBtn').onclick = () => {
     const text = document.getElementById('proofContentData').innerText;
     navigator.clipboard.writeText(text).then(() => {
