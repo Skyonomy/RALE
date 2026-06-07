@@ -369,7 +369,7 @@ function addTrace(agent, event, details = "") {
         state.specialistTimer = null;
     }
 
-    if (msgLower.includes("writing 5 verified ielts mcqs")) {
+    if (msgLower.includes("validated ielts mcqs")) {
         state.specialistStepIdx = 0;
         state.specialistTimer = setInterval(() => {
             if (state.specialistStepIdx < state.specialistSteps.length) {
