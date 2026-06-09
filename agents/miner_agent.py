@@ -13,20 +13,20 @@ class MinerAgent:
 
     def __init__(self, key_manager):
         self.key_manager = key_manager
-        # Stable 1.5 Flash for guaranteed availability and speed
+        # Reverted back to 2.5 Flash for guaranteed speed in live presentations
         self.adk_agent = Agent(
-            name="miner_agent",
-            model="gemini-flash-latest",
+            name="MINER",
+            model="gemini-2.5-flash",
             instruction=(
-                "You are a precision vision extraction agent. Your task is to analyze "
-                "architectural schematics and extract 1000x1000 coordinates. "
-                "Output exactly 5 landmarks with their bounding boxes and a 450+ word script. "
+                "You are an elite, highly precise architectural vision extraction agent. "
+                "Your task is to analyze 2D schematics and extract coordinates on a 0-1000 scale. "
+                "Output exactly 5 landmarks with their bounding boxes and a 400+ word script. "
+                "\nCRITICAL BOUNDING BOX INSTRUCTIONS:\n"
+                "1. TIGHT CROPPING: Your bounding boxes MUST perfectly and tightly hug the actual edges of the landmark structure or garden.\n"
+                "2. NO BLEEDING: Do NOT include surrounding pathways, roads, or negative space inside the box. Crop as tightly to the colored pixels of the target as mathematically possible.\n"
+                "3. SHAPE ALIGNMENT: If the object is oblong, make an oblong box. If it is tall, make a tall box.\n"
                 "Return valid JSON matching the schema."
-                "\nCRITICAL: ALWAYS use the validate_multimodal_geometry tool to check your "
-                "coordinates before returning your final answer. If it rejects your proposal, "
-                "you MUST fix the coordinates based on its feedback and check again!"
             ),
-            tools=[validate_multimodal_geometry],
             output_schema=VisionResponse,
             output_key="vision_result"
         )

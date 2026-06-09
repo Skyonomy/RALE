@@ -15,7 +15,7 @@ class Landmark(BaseModel):
     anchor_policy: str = Field(default="center", description="How to calculate the anchor point.")
 
 class VisionResponse(BaseModel):
-    script: str = Field(..., description="A 450+ word professional tour guide script.")
+    script: str = Field(..., description="A 400+ word professional tour guide script.")
     labels: List[Landmark] = Field(..., description="A list of exactly 5 validated landmarks.")
 
 class Question(BaseModel):

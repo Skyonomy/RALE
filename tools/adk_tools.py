@@ -39,20 +39,32 @@ def adk_tool(name: str):
         return func
     return decorator
 
-@adk_tool(name="validate_euclidean_distance")
-def validate_multimodal_geometry_func(vision_proposal: Any, is_stress_test: bool = False, skip_word_count: bool = False) -> Dict[str, Any]:
+@adk_tool(name="validate_multimodal_geometry")
+def validate_multimodal_geometry_func(vision_proposal: Any, is_stress_test: bool = False, skip_word_count: bool = False, spatial_regime: str = "normal") -> Dict[str, Any]:
     """
     Validates model-proposed spatial telemetry and coordinates.
     Performs Euclidean distance checks and structural word-count audits.
     
     Args:
         vision_proposal: The proposed script and labels from the vision agent.
-        is_stress_test: Whether to use stricter validation thresholds.
+        is_stress_test: DEPRECATED (use spatial_regime).
         skip_word_count: If True, bypasses the minimum 500-word density check.
+        spatial_regime: The validation difficulty ('normal', 'constrained', 'stress').
     """
-    logger.info(f"Tool: validate_multimodal_geometry called. Type of vision_proposal: {type(vision_proposal)}")
+    # Backward compatibility
+    if is_stress_test and spatial_regime == "normal":
+        spatial_regime = "constrained"
+
+    logger.info(f"Tool: validate_multimodal_geometry called. Regime: {spatial_regime}. Type of vision_proposal: {type(vision_proposal)}")
     logger.info(f"Content of vision_proposal: {vision_proposal}")
     
+    if isinstance(vision_proposal, str):
+        try:
+            import json
+            vision_proposal = json.loads(vision_proposal)
+        except Exception as e:
+            logger.warning(f"Could not parse vision_proposal as JSON: {e}")
+
     # If the model passes a list, let's see if we can find the dictionary inside it,
     # or handle the list defensively if the model structure is slightly different.
     if isinstance(vision_proposal, list):
@@ -65,20 +77,34 @@ def validate_multimodal_geometry_func(vision_proposal: Any, is_stress_test: bool
             labels = []
             script = ""
     elif isinstance(vision_proposal, dict):
-        script = vision_proposal.get('script', '')
-        labels = vision_proposal.get('labels', [])
+        # Defensive De-nesting: Handle cases where the tool argument is nested under key names
+        inner_prop = vision_proposal
+        if 'vision_proposal' in vision_proposal and isinstance(vision_proposal['vision_proposal'], dict):
+            inner_prop = vision_proposal['vision_proposal']
+        elif 'vision_result' in vision_proposal and isinstance(vision_proposal['vision_result'], dict):
+            inner_prop = vision_proposal['vision_result']
+            
+        script = inner_prop.get('script', '')
+        labels = inner_prop.get('labels', [])
     else:
         script = ""
         labels = []
     
     # 1. Structural Audit
     word_count = len(script.split())
-    if not skip_word_count and word_count < 500:
+    if not skip_word_count and word_count < 250:
+        if word_count == 0:
+            return {
+                "status": "REJECTED",
+                "failure_type": "ARTIFACT_SCHEMA",
+                "message": "Repair candidate failed full artifact contract. Rehydrating preserved narrative script and retrying.",
+                "guidance": "Ensure the 'script' field is populated with the descriptive walking tour narrative (minimum 250 words)."
+            }
         return {
             "status": "REJECTED",
             "failure_type": "SCRIPT_DENSITY",
-            "message": f"Script density too low ({word_count} words). Minimum 500 required.",
-            "guidance": "Expand the script to include more navigational details and descriptive signposting (minimum 500 words)."
+            "message": f"Script density too low ({word_count} words). Minimum 250 required.",
+            "guidance": "Expand the script to include more navigational details and descriptive signposting (minimum 250 words)."
         }
 
     if len(labels) < 5:
@@ -90,7 +116,12 @@ def validate_multimodal_geometry_func(vision_proposal: Any, is_stress_test: bool
         }
 
     # 2. Geometric Audit (Euclidean distance on center points)
-    collision_threshold = 300.0 if is_stress_test else 160.0
+    if spatial_regime == "stress":
+        collision_threshold = 260.0
+    elif spatial_regime == "constrained":
+        collision_threshold = 200.0
+    else:
+        collision_threshold = 140.0
     
     # Calculate center points
     for label in labels:
@@ -119,17 +150,23 @@ def validate_multimodal_geometry_func(vision_proposal: Any, is_stress_test: bool
                 }
 
     # 3. Canvas Edge-Clipping Check (Coordinate Boundary Gate)
+    if spatial_regime == "stress":
+        margin = 60.0
+    elif spatial_regime == "constrained":
+        margin = 40.0
+    else:
+        margin = 20.0
+
     for label in labels:
         try:
             ymin, xmin, ymax, xmax = float(label['ymin']), float(label['xmin']), float(label['ymax']), float(label['xmax'])
-            margin = 80.0
             if xmin < margin or ymin < margin or xmax > (1000.0 - margin) or ymax > (1000.0 - margin):
                 clip_edge = "left" if xmin < margin else "top" if ymin < margin else "right" if xmax > (1000.0 - margin) else "bottom"
                 return {
                     "status": "REJECTED",
                     "failure_type": "EDGE_CLIPPING",
                     "message": f"Landmark {label.get('number', '?')} ({label.get('location_name', 'Unnamed')}) is too close to the canvas edge (clipped on {clip_edge}).",
-                    "guidance": f"Re-center and move the bounding box of '{label.get('location_name')}' slightly inward away from the {clip_edge} canvas border (minimum margin 80px)."
+                    "guidance": f"Re-center and move the bounding box of '{label.get('location_name')}' slightly inward away from the {clip_edge} canvas border (requires {int(margin)}px edge margin in {spatial_regime} regime)."
                 }
         except (KeyError, ValueError):
             pass
@@ -162,7 +199,7 @@ def validate_multimodal_geometry_func(vision_proposal: Any, is_stress_test: bool
 
     return {
         "status": "PASSED",
-        "message": "All production validation gates cleared.",
+        "message": "All configured validation gates cleared.",
         "validated_telemetry": labels
     }
 

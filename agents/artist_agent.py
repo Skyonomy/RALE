@@ -1,6 +1,8 @@
 import logging
 import base64
 import time
+import os
+import uuid
 from google import genai
 from google.genai import types
 from typing import Dict, Optional
@@ -12,6 +14,7 @@ class ArtistAgent:
     """
     The Artist Agent: Uses Google Imagen models to generate high-fidelity,
     clean architectural maps and site plans.
+    Uploads images to Google Cloud Storage if configured.
     """
 
     def __init__(self, key_manager: KeyManager):
@@ -20,6 +23,19 @@ class ArtistAgent:
         # Fast variant has higher quota and lower latency
         self.primary_model = "imagen-4.0-fast-generate-001"
         self.fallback_model = "imagen-4.0-fast-generate-001"
+        
+        self.gcs_bucket_name = os.environ.get("GCS_BUCKET_NAME")
+        self.storage_client = None
+        self.bucket = None
+        if self.gcs_bucket_name:
+            try:
+                from google.cloud import storage
+                self.storage_client = storage.Client()
+                self.bucket = self.storage_client.bucket(self.gcs_bucket_name)
+                logger.info(f"ArtistAgent: Initialized with GCS bucket: {self.gcs_bucket_name}")
+            except Exception as e:
+                logger.error(f"ArtistAgent: Failed to initialize GCS client: {e}. Falling back to base64.")
+                self.gcs_bucket_name = None
 
     def _refresh_client(self):
         """Re-instantiates the genai Client with the current key from KeyManager."""
@@ -70,8 +86,21 @@ class ArtistAgent:
                 if not raw_binary:
                     return {"status": "error", "message": f"No image bytes returned from {model_name}"}
 
-                b64_data = base64.b64encode(raw_binary).decode('utf-8')
-                image_url = f"data:image/png;base64,{b64_data}"
+                image_url = ""
+                # Attempt GCS Upload
+                if self.gcs_bucket_name and self.bucket:
+                    filename = f"map_{uuid.uuid4().hex[:8]}.png"
+                    try:
+                        blob = self.bucket.blob(f"images/{filename}")
+                        blob.upload_from_string(raw_binary, content_type="image/png")
+                        image_url = f"https://storage.googleapis.com/{self.gcs_bucket_name}/images/{filename}"
+                    except Exception as e:
+                        logger.error(f"ArtistAgent: GCS upload failed: {e}. Falling back to base64.")
+                
+                # Base64 Fallback
+                if not image_url:
+                    b64_data = base64.b64encode(raw_binary).decode('utf-8')
+                    image_url = f"data:image/png;base64,{b64_data}"
 
                 return {
                     "status": "success",

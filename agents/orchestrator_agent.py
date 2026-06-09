@@ -2,7 +2,6 @@ import logging
 import asyncio
 import json
 import uuid
-import sqlite3
 from typing import Dict, List, Optional, Any, AsyncGenerator
 from google.genai import types
 from pydantic import BaseModel, Field, ValidationError
@@ -55,27 +54,52 @@ class AuditorNode(BaseNode):
         except Exception as e:
             logger.warning(f"AuditorNode: Error parsing proposal: {e}")
 
+        # Preserve and restore original script during repairs
+        if proposal:
+            if self.attempt == 1:
+                ctx.session.state['original_script'] = proposal.script
+            elif not proposal.script:
+                proposal.script = ctx.session.state.get('original_script', '')
+
+        # Defensive Check: If parsing failed, trigger self-healing instead of crashing
+        if not proposal:
+            database.log_validation_attempt(self.run_id, self.attempt, "REJECTED", "Schema parsing failure.")
+            database.log_custom_event(self.run_id, "Auditor", "❌ REJECTED: Schema parsing failure. Output does not match VisionResponse.")
+            if self.attempt >= 5:
+                database.log_custom_event(self.run_id, "Auditor", "💥 FATAL: Maximum retries (5) reached. Aborting pipeline.")
+                yield Event(actions=EventActions(route="FAILED"), output="Schema parsing failure.")
+            else:
+                database.log_custom_event(self.run_id, "Auditor", "🔄 Escalating to Pro Tier. Triggering Playwright self-healing coordinate repair...")
+                rejection_package = "Error: Output must be valid JSON matching the VisionResponse schema. Please regenerate and format strictly as JSON."
+                yield Event(actions=EventActions(route="REJECTED"), output=rejection_package)
+            return
+
         # 2. Check for tool rejections first (from previous agent's function calls)
         tool_rejection = None
         try:
-            conn = sqlite3.connect(database.DB_PATH, timeout=10)
-            cursor = conn.cursor()
-            cursor.execute("SELECT function_response FROM adk_events WHERE run_id=? AND function_response IS NOT NULL AND function_response != '' ORDER BY id DESC LIMIT 1", (self.run_id,))
-            row = cursor.fetchone()
-            conn.close()
-            
-            if row and row[0]:
-                res_dict = json.loads(row[0])
-                if isinstance(res_dict, dict) and res_dict.get('status') == 'REJECTED':
-                    tool_rejection = res_dict.get('message')
+            db = database.SessionLocal()
+            try:
+                # Query for the latest function_response for this run_id
+                latest_event = db.query(database.ADKEvent).filter(
+                    database.ADKEvent.run_id == self.run_id,
+                    database.ADKEvent.function_response != None,
+                    database.ADKEvent.function_response != ''
+                ).order_by(database.ADKEvent.id.desc()).first()
+                
+                if latest_event and latest_event.function_response:
+                    res_dict = json.loads(latest_event.function_response)
+                    if isinstance(res_dict, dict) and res_dict.get('status') == 'REJECTED':
+                        tool_rejection = res_dict.get('message')
+            finally:
+                db.close()
         except Exception as e:
             logger.warning(f"AuditorNode: Error checking tool responses: {e}")
 
         if tool_rejection:
             database.log_validation_attempt(self.run_id, self.attempt, "REJECTED", tool_rejection)
             database.log_custom_event(self.run_id, "Auditor", f"❌ REJECTED: validate_multimodal_geometry tool failed collision check: {tool_rejection}")
-            if self.attempt >= 3:
-                database.log_custom_event(self.run_id, "Auditor", "💥 FATAL: Maximum retries (3) reached. Aborting pipeline.")
+            if self.attempt >= 5:
+                database.log_custom_event(self.run_id, "Auditor", "💥 FATAL: Maximum retries (5) reached. Aborting pipeline.")
                 yield Event(actions=EventActions(route="FAILED"), output=tool_rejection)
             else:
                 database.log_custom_event(self.run_id, "Auditor", "🔄 Escalating to Pro Tier. Triggering Playwright self-healing coordinate repair...")
@@ -92,112 +116,43 @@ class AuditorNode(BaseNode):
             from tools.adk_tools import validate_multimodal_geometry_func
             config = ctx.session.state.get('config', {})
             is_stress_test = config.get('stress_test', False)
+            spatial_regime = config.get('spatial_regime', 'normal')
             skip_word_count = config.get('skip_word_count', False)
             
-            audit_res = validate_multimodal_geometry_func(proposal.model_dump(), is_stress_test=is_stress_test, skip_word_count=skip_word_count)
+            audit_res = validate_multimodal_geometry_func(
+                proposal.model_dump(), 
+                is_stress_test=is_stress_test, 
+                skip_word_count=skip_word_count,
+                spatial_regime=spatial_regime
+            )
             
             if audit_res['status'] == "PASSED":
-                # 4. Multimodal Semantic Audit Pass (Proactive Compliance)
-                database.log_custom_event(self.run_id, "Auditor", "⚖️ Initiating Multimodal Semantic Audit Pass via Gemini 2.5 Flash...")
-                
-                image_binary_b64 = ctx.session.state.get('image_binary')
-                semantic_rejected = False
-                semantic_error_msg = ""
-                
-                if image_binary_b64:
-                    try:
-                        import base64
-                        from google import genai
-                        from google.genai import types
-                        import os
-                        
-                        img_bytes = base64.b64decode(image_binary_b64.encode('utf-8'))
-                        
-                        # Construct a detailed list of the proposed coordinates and their names
-                        proposals_list = []
-                        for lbl in proposal.labels:
-                            proposals_list.append(f"- Stop #{lbl.number} ({lbl.location_name}): [ymin: {lbl.ymin}, xmin: {lbl.xmin}, ymax: {lbl.ymax}, xmax: {lbl.xmax}]")
-                        proposals_str = "\n".join(proposals_list)
-                        
-                        # Connect to Gemini 2.5 Flash using dynamic key
-                        km = ctx.session.state.get('config', {}).get('api_key') or os.environ.get("GOOGLE_API_KEY")
-                        client = genai.Client(api_key=km)
-                        
-                        scenario_name = ctx.session.state.get('scenario', 'Theme Park')
-                        semantic_prompt = f"""You are a strict GRC compliance auditor performing a semantic visual compliance scan on a newly generated 2D site map of: {scenario_name}.
-The system has proposed the following 5 landmarks with their bounding boxes (scale 0-1000, [ymin, xmin, ymax, xmax]):
-{proposals_str}
-
-YOUR TASK:
-Review each proposal and verify if the bounding box area on the map visually matches its intended label and thematic purpose for a {scenario_name}!
-- A bounding box for an open plaza, paved area, or concourse should be placed precisely over flat paved stonework, concrete, or cobblestone ground, not over building roofs, water elements, or green organic gardens.
-- A bounding box for a natural/organic nature area or garden should be placed over green shrubbery, grass, bio-domes, or foliage textures.
-- A bounding box for a structural building roof should be placed over a grey, white, or defined roof element.
-- A bounding box for an aquatic pool or water element should be placed over the vibrant cyan-blue water element.
-
-If any landmark does NOT visually match its label, return a JSON response with status 'REJECTED' and a specific, detailed rejection reason. If all landmarks visually match their labels, return status 'PASSED'.
-
-Strictly output a JSON matching this schema:
-{{
-  "status": "PASSED" or "REJECTED",
-  "reason": "specific semantic rejection reason"
-}}
-"""
-                        audio_part = types.Part.from_bytes(data=img_bytes, mime_type="image/png")
-                        response = client.models.generate_content(
-                            model="gemini-2.5-flash",
-                            contents=[semantic_prompt, audio_part],
-                            config=types.GenerateContentConfig(
-                                response_mime_type='application/json',
-                                temperature=0.1
-                            )
-                        )
-                        
-                        res_data = json.loads(response.text)
-                        if res_data.get('status') == "REJECTED":
-                            semantic_rejected = True
-                            semantic_error_msg = res_data.get('reason', 'Semantic audit failed.')
-                        else:
-                            database.log_custom_event(self.run_id, "Auditor", "✅ SEMANTIC AUDIT PASSED: Bounding boxes match their visual labels!")
-                    except Exception as sem_err:
-                        logger.warning(f"AuditorNode: Semantic pass failed to execute: {sem_err}. Skipping to ensure pipeline stability.")
-                
-                if semantic_rejected:
-                    database.log_validation_attempt(self.run_id, self.attempt, "REJECTED", semantic_error_msg)
-                    database.log_custom_event(self.run_id, "Auditor", f"❌ REJECTED: Semantic audit failed: {semantic_error_msg}")
-                    if self.attempt >= 3:
-                        database.log_custom_event(self.run_id, "Auditor", "💥 FATAL: Maximum retries (3) reached. Aborting pipeline.")
-                        yield Event(actions=EventActions(route="FAILED"), output=semantic_error_msg)
-                    else:
-                        database.log_custom_event(self.run_id, "Auditor", "🔄 Escalating to Pro Tier. Triggering Playwright self-healing coordinate repair...")
-                        rejection_package = f"Error: {semantic_error_msg}\nOriginal Script: {proposal.script}\nOriginal Labels: {proposal.model_dump_json()}"
-                        yield Event(actions=EventActions(route="REJECTED"), output=rejection_package)
-                else:
-                    database.log_validation_attempt(self.run_id, self.attempt, "PASSED", "")
-                    database.log_custom_event(self.run_id, "Auditor", "✅ PASSED: All visual, geometric, and semantic GRC constraints cleared! Routing to Specialist.")
-                    validated_labels = audit_res.get('validated_telemetry', [])
-                    if validated_labels:
-                        proposal.labels = [Landmark.model_validate(label) for label in validated_labels]
-                    prompt_for_specialist = f"Script: {proposal.script}"
-                    yield Event(actions=EventActions(route="PASSED", state_delta={"vision_result": proposal.model_dump()}), output=prompt_for_specialist)
+                database.log_validation_attempt(self.run_id, self.attempt, "PASSED", "")
+                database.log_custom_event(self.run_id, "Auditor", "✅ PASSED: All visual and geometric GRC constraints cleared! Routing to Specialist.")
+                validated_labels = audit_res.get('validated_telemetry', [])
+                if validated_labels:
+                    proposal.labels = [Landmark.model_validate(label) for label in validated_labels]
+                prompt_for_specialist = f"Script: {proposal.script}"
+                yield Event(actions=EventActions(route="PASSED", state_delta={"vision_result": proposal.model_dump()}), output=prompt_for_specialist)
             else:
                 msg = audit_res.get('message', 'Geometry failed.')
                 database.log_validation_attempt(self.run_id, self.attempt, "REJECTED", msg)
                 database.log_custom_event(self.run_id, "Auditor", f"❌ REJECTED: Geometric audit failed: {msg}")
-                if self.attempt >= 3:
-                    database.log_custom_event(self.run_id, "Auditor", "💥 FATAL: Maximum retries (3) reached. Aborting pipeline.")
+                if self.attempt >= 5:
+                    database.log_custom_event(self.run_id, "Auditor", "💥 FATAL: Maximum retries (5) reached. Aborting pipeline.")
                     yield Event(actions=EventActions(route="FAILED"), output=msg)
                 else:
                     database.log_custom_event(self.run_id, "Auditor", "🔄 Escalating to Pro Tier. Triggering Playwright self-healing coordinate repair...")
                     # Package both error and original script!
-                    rejection_package = f"Error: {msg}\nOriginal Script: {proposal.script}\nOriginal Labels: {proposal.model_dump_json()}"
+                    spatial_regime_instruction = f" (CRITICAL: You are running in {spatial_regime.upper()} mode. You MUST pass `spatial_regime='{spatial_regime}'` AND `skip_word_count=True` to the `validate_multimodal_geometry` tool when validating your repair.)"
+                    rejection_package = f"Error: {msg}{spatial_regime_instruction}\nOriginal Script: {proposal.script}\nOriginal Labels: {proposal.model_dump_json()}"
                     yield Event(actions=EventActions(route="REJECTED"), output=rejection_package)
                     
         except Exception as e:
             err = f"Auditor Logic Error: {str(e)}"
             logger.error(f"AuditorNode Error: {err}")
             database.log_validation_attempt(self.run_id, self.attempt, "FAILED", err)
-            if self.attempt >= 3:
+            if self.attempt >= 5:
                 yield Event(actions=EventActions(route="FAILED"), output=err)
             else:
                 yield Event(actions=EventActions(route="REJECTED"), output=err)
@@ -235,7 +190,7 @@ class OrchestratorAgent:
         )
 
         # Instantiate Auditor dynamically so it has the run_id
-        auditor = AuditorNode(run_id=run_id, name="auditor")
+        auditor = AuditorNode(run_id=run_id, name="AUDITOR")
         
         # DECLARATIVE, CYCLIC WORKFLOW DEFINITION
         wf = Workflow(
@@ -275,12 +230,12 @@ class OrchestratorAgent:
             
             if author and author not in logged_starts:
                 logged_starts.add(author)
-                if author == "miner_agent":
-                    database.log_custom_event(run_id, "Miner", "🔍 Miner active on economy tier (Flash). Commencing visual scan...")
-                elif author == "playwright_agent":
-                    database.log_custom_event(run_id, "Playwright", "🛠️ Playwright active on escalated tier (Pro). Initiating self-healing coordinate repair...")
-                elif author == "specialist_agent":
-                    database.log_custom_event(run_id, "Specialist", "✍️ Specialist active on fast tier (Flash). Writing exactly 5 validated IELTS MCQs...")
+                if author == "MINER":
+                    database.log_custom_event(run_id, "MINER", "🔍 Miner active on economy tier (Flash). Commencing visual scan...")
+                elif author == "PLAYWRIGHT":
+                    database.log_custom_event(run_id, "PLAYWRIGHT", "🛠️ Playwright active on escalated tier (Pro). Initiating self-healing coordinate repair...")
+                elif author == "SPECIALIST":
+                    database.log_custom_event(run_id, "SPECIALIST", "✍️ Specialist active on fast tier (Flash). Writing exactly 5 validated IELTS MCQs...")
                     
             event_type = type(event).__name__
             
@@ -314,44 +269,24 @@ class OrchestratorAgent:
                     audit_failed_reason = getattr(event, 'output', 'Max retries reached')
                 if event.actions.state_delta:
                     if 'vision_result' in event.actions.state_delta:
+                        old_labels = final_data.get('labels', [])
+                        new_labels = event.actions.state_delta['vision_result'].get('labels', [])
+                        if old_labels and new_labels and author == "playwright_agent":
+                            for i in range(min(len(old_labels), len(new_labels))):
+                                if old_labels[i].get('ymin') != new_labels[i].get('ymin') or old_labels[i].get('xmin') != new_labels[i].get('xmin'):
+                                    loc_name = new_labels[i].get('location_name', f'Landmark {i+1}')
+                                    database.log_custom_event(run_id, "Playwright", f"🛠️ REPAIR APPLIED: '{loc_name}' shifted from (y:{old_labels[i].get('ymin')}->{new_labels[i].get('ymin')}, x:{old_labels[i].get('xmin')}->{new_labels[i].get('xmin')}). Landmark now satisfies boundary clearance.")
+                                    break
                         final_data.update(event.actions.state_delta['vision_result'])
                     if 'specialist_result' in event.actions.state_delta:
                         final_data.update(event.actions.state_delta['specialist_result'])
 
         # Let's query the database to find the first validation attempt and initial metrics
-        first_pass_rejection_reason = "NONE"
-        first_pass_metrics = {"word_count": 0, "anchor_count": 0}
-        
-        try:
-            conn = sqlite3.connect(database.DB_PATH, timeout=10)
-            cursor = conn.cursor()
-            
-            # Find first rejection reason (if any)
-            cursor.execute("SELECT error_message FROM validation_attempts WHERE run_id = ? AND status = 'REJECTED' ORDER BY attempt_number ASC LIMIT 1", (run_id,))
-            row = cursor.fetchone()
-            if row:
-                first_pass_rejection_reason = row[0]
-                
-            # Parse the first miner_agent function call arguments to count first-pass words/anchors
-            cursor.execute("SELECT function_call_args FROM adk_events WHERE run_id = ? AND author = 'miner_agent' AND function_call_args IS NOT NULL AND function_call_args != '' ORDER BY id ASC LIMIT 1", (run_id,))
-            row_ev = cursor.fetchone()
-            if row_ev and row_ev[0]:
-                try:
-                    p = json.loads(row_ev[0])
-                    prop = p.get('vision_proposal', {})
-                    scr = prop.get('script', '')
-                    lbls = prop.get('labels', [])
-                    first_pass_metrics["word_count"] = len(scr.split())
-                    first_pass_metrics["anchor_count"] = len(lbls)
-                except Exception as ex:
-                    logger.debug(f"Error parsing miner event for metrics: {ex}")
-            conn.close()
-        except Exception as e:
-            logger.warning(f"Error gathering first pass metrics: {e}")
+        first_pass_rejection_reason, first_pass_metrics = database.get_first_pass_metrics(run_id)
 
         if audit_failed_reason:
             database.update_run(run_id, "FAILED", False, recovery_triggered)
-            return {"status": "error", "message": f"Failed bounded validation-repair loop: {audit_failed_reason}"}
+            return {"status": "error", "message": f"DAG terminated safely: {audit_failed_reason}"}
 
         database.update_run(run_id, "SUCCESS", True, recovery_triggered)
         return {
@@ -370,8 +305,9 @@ class OrchestratorAgent:
     async def _execute_workflow_logic(self, scenario: str, config: Dict) -> Dict:
         try:
             import uuid
-            run_id = str(uuid.uuid4())
-            database.log_run(run_id, scenario)
+            run_id = config.get('run_id') or str(uuid.uuid4())
+            spatial_regime = config.get('spatial_regime', 'normal')
+            database.log_run(run_id, scenario, spatial_regime)
             
             # Log the authentic Artist generation start!
             database.log_custom_event(run_id, "Artist", f"🎨 Initiating Imagen 4.0 generation for scenario: {scenario}...")

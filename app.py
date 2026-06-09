@@ -21,6 +21,9 @@ from agents.orchestrator_agent import OrchestratorAgent
 from tools.forensic_compositor import ForensicCompositor
 from tools.audio_engine import AudioEngine
 
+DEFAULT_IMAGE_PROMPT = """A professional, high-contrast, strictly 2D top-down architectural site map of: {SCENARIO}.
+Style: Clean, minimalist schematic design. High-fidelity textures with absolutely zero text, zero labels, zero letters, and zero clutter."""
+
 def create_app(test_config=None):
     app = Flask(__name__)
     
@@ -143,7 +146,7 @@ def create_app(test_config=None):
     1. SCAN: Look for the 5 color-coded anchors (Golden Hexagon, Blue Pool, Green Garden, Grey Building, Stone Plaza) on the map.
     2. ANCHOR: Assign Stop #1 to the visual Main Entrance / Entry Gates (Grey Building), situated at the bottom, top, or sides of the map. Assign the remaining 4 stops in a logical clockwise walking tour order.
     3. BOUNDING BOXES: Draw precise, tight bounding boxes [ymin, xmin, ymax, xmax] around each identified sector on the 1000x1000 grid.
-    4. SCRIPTING (450 WORDS): Write a professional, highly engaging, and natural human tour guide script for this scenario.
+    4. SCRIPTING (400 WORDS): Write a professional, highly engaging, and natural human tour guide script for this scenario.
        - STYLE: Warm, enthusiastic, and conversational. Speak like an expert guide leading a real walking tour at a premier {SCENARIO} (e.g., "Welcome adventurers!", "Let's stroll right past...", "look up to see...", "on our left...").
        - CRITICAL LIMITATION: ABSOLUTELY NEVER mention raw numerical coordinates, brackets, coordinates, numbers, or grid boundaries in the spoken script (e.g. do NOT say '[573, 103]', 'coordinates', or 'grid').
        - LANDMARKS: Guide the listener using smooth spatial directions and specific thematic names for this scenario:
@@ -211,9 +214,11 @@ def create_app(test_config=None):
         vision_prompt = vision_prompt.replace("{PLAZA_NAME}", theme.plaza_zone_name)
 
         config = {
+            "run_id": data.get('run_id'),
             "image_prompt": get_image_prompt(raw_scenario, theme),
             "vision_prompt": vision_prompt,
-            "stress_test": data.get('stress_test', False)
+            "stress_test": data.get('stress_test', False),
+            "spatial_regime": data.get('spatial_regime', 'normal')
         }
         
         try:
@@ -226,11 +231,29 @@ def create_app(test_config=None):
             # Create the 'Teacher View' with HUD overlays
             teacher_b64 = ForensicCompositor.composite_teacher_map(result['raw_binary'], result['vision_result'])
             
-            logger.info("AudioEngine: Synchronized audio stream ready.")
-            script = result['vision_result'].get('script', '')
-            audio_res = audio_engine.generate_karaoke_audio(script)
+            skip_audio = data.get('skip_audio', False)
+            if skip_audio:
+                logger.info("AudioEngine: Skipping audio generation as requested.")
+                audio_res = {"status": "skipped", "audio_url": "", "words": []}
+            else:
+                logger.info("AudioEngine: Synchronized audio stream ready.")
+                
+                # EMIT A REAL ADK EVENT SO THE UI CAN RENDER A TIMER
+                run_id_for_log = result['run_id']
+                database.log_custom_event(run_id_for_log, "Narrator", "🎤 Synthesizing TTS and audio-transcript alignment...")
+                
+                script = result['vision_result'].get('script', '')
+                audio_res = audio_engine.generate_karaoke_audio(script)
             
             logger.info("Verified artifact ready for export.")
+
+            run_id_for_log = result['run_id']
+            artistCost = 0.0300
+            reviewerCost = 0.0002
+            standardBaseCost = 0.0035
+            actual_cost = artistCost + reviewerCost + standardBaseCost
+            if result['recovery_triggered']:
+                actual_cost += 0.0190
             
             # Extract metrics for logging convenience
             first_pass_words = result.get('first_pass_metrics', {}).get('word_count', 0)
@@ -240,12 +263,13 @@ def create_app(test_config=None):
 
             return jsonify({
                 "status": "success",
+                "run_id": result['run_id'],
                 "scenario": scenario_title,
                 "image_url": result['image_url'],
                 "teacher_image_b64": teacher_b64,
                 "vision_result": result['vision_result'],
                 "questions": result['vision_result'].get('questions', []),
-                "audio_url": f"/static/uploads/{audio_res['audio_filename']}" if audio_res.get('status') == 'success' else "",
+                "audio_url": audio_res.get('audio_url', "") if audio_res.get('status') == 'success' else "",
                 "words": audio_res.get('words', []),
                 "audit": {
                     "passed": result['audit_passed'],
@@ -319,6 +343,61 @@ def create_app(test_config=None):
             "questions": assessment_res['questions']
         })
 
+    @app.route('/api/audit-stats', methods=['GET'])
+    def audit_stats():
+        mode = request.args.get('mode', 'normal')
+        import database
+        from sqlalchemy import text
+        db = database.SessionLocal()
+        try:
+            # Exclude STARTED runs that haven't finished, only count SUCCESS or FAILED
+            query = f"SELECT status, recovery_triggered, COUNT(*) FROM runs WHERE status IN ('SUCCESS', 'FAILED', 'error') AND spatial_regime = :mode GROUP BY status, recovery_triggered"
+            res = db.execute(text(query), {"mode": mode}).fetchall()
+            
+            total_runs = 0
+            baseline_success = 0
+            healed_success = 0
+            failed_runs = 0
+            
+            for row in res:
+                status, recovery, count = row
+                total_runs += count
+                if status == 'SUCCESS':
+                    if recovery:
+                        healed_success += count
+                    else:
+                        baseline_success += count
+                else:
+                    failed_runs += count
+            
+            # Simple averages for display purposes (Estimated Model, Not Token-Metered)
+            artistCost = 0.0300
+            reviewerCost = 0.0002
+            standardBaseCost = 0.0035
+            standardProBaseCost = 0.0162
+            repairCost = 0.0190
+            
+            actual_cost = (baseline_success * (artistCost + reviewerCost + standardBaseCost)) + (healed_success * (artistCost + reviewerCost + standardBaseCost + repairCost))
+            pro_cost_baseline = (baseline_success + healed_success) * (artistCost + reviewerCost + standardProBaseCost)
+            
+            savings_pct = 0
+            if pro_cost_baseline > 0:
+                savings_pct = ((pro_cost_baseline - actual_cost) / pro_cost_baseline) * 100
+                
+            return jsonify({
+                "total": total_runs,
+                "baseline_success": baseline_success,
+                "healed_success": healed_success,
+                "failed": failed_runs,
+                "actual_cost": actual_cost,
+                "pro_cost": pro_cost_baseline,
+                "savings_pct": savings_pct
+            })
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
+        finally:
+            db.close()
+
     @app.route('/api/log-metrics', methods=['POST'])
     def log_metrics():
         """Logs the results of a single generation run for competition evidence."""
@@ -337,16 +416,28 @@ def create_app(test_config=None):
                         'Duration_Seconds'
                     ])
                 
+                first_pass_words = data.get('firstPassWords', 0)
+                first_pass_anchors = data.get('firstPassAnchors', 0)
+                final_words = data.get('finalWords', 0)
+                final_anchors = data.get('finalAnchors', 0)
+                
+                # If no recovery was triggered (successful first-pass run), ensure metrics are matched and not logged as 0
+                if not data.get('recoveryTriggered', False):
+                    if first_pass_words == 0:
+                        first_pass_words = final_words
+                    if first_pass_anchors == 0:
+                        first_pass_anchors = final_anchors
+
                 writer.writerow([
                     data.get('mode', 'NORMAL'),
                     data.get('scenario', 'Unknown'),
-                    data.get('firstPassWords', 0),
-                    data.get('firstPassAnchors', 0),
+                    first_pass_words,
+                    first_pass_anchors,
                     'FAIL' if data.get('recoveryTriggered') else 'PASS',
                     data.get('rejectionReason', 'NONE'),
                     data.get('recoveryTriggered', False),
-                    data.get('finalWords', 0),
-                    data.get('finalAnchors', 0),
+                    final_words,
+                    final_anchors,
                     'SUCCESS',
                     data.get('failureType', 'NONE'),
                     data.get('duration', 0)

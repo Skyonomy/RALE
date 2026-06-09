@@ -11,10 +11,10 @@ class SpecialistAgent:
     """
     def __init__(self, key_manager):
         self.key_manager = key_manager
-        # Stable 1.5 Flash for speed
+        # Stable 2.5 Flash for speed
         self.adk_agent = Agent(
-            name="specialist_agent",
-            model="gemini-flash-latest",
+            name="SPECIALIST",
+            model="gemini-2.5-flash",
             instruction="Create exactly 5 IELTS MCQs based on the provided script.",
             output_schema=SpecialistResponse,
             output_key="specialist_result"

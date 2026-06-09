@@ -180,7 +180,9 @@ class ForensicCompositor:
                     
                     draw_overlay.rectangle(
                         [xmin_px, ymin_px, xmax_px, ymax_px],
-                        fill=fill_color
+                        fill=fill_color,
+                        outline=c_color,
+                        width=3
                     )
                     # Top-Left
                     draw_overlay.line([(xmin_px, ymin_px + corner_length), (xmin_px, ymin_px), (xmin_px + corner_length, ymin_px)], fill=c_color, width=line_w)

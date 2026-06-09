@@ -1,0 +1,44 @@
+{
+    "normal": {
+        "counted_runs": 20,
+        "first_pass_success_count": 12,
+        "repaired_success_count": 8,
+        "validation_failure_count": 0,
+        "final_success_count": 20,
+        "excluded_api_error_count": 0,
+        "excluded_timeout_count": 0,
+        "excluded_rate_limit_count": 3,
+        "first_pass_success_rate": 0.6,
+        "repaired_success_rate": 0.4,
+        "final_success_rate": 1.0,
+        "repair_trigger_rate": 0.4
+    },
+    "constrained": {
+        "counted_runs": 0,
+        "first_pass_success_count": 0,
+        "repaired_success_count": 0,
+        "validation_failure_count": 0,
+        "final_success_count": 0,
+        "excluded_api_error_count": 0,
+        "excluded_timeout_count": 0,
+        "excluded_rate_limit_count": 0,
+        "first_pass_success_rate": 0,
+        "repaired_success_rate": 0,
+        "final_success_rate": 0,
+        "repair_trigger_rate": 0
+    },
+    "stress": {
+        "counted_runs": 0,
+        "first_pass_success_count": 0,
+        "repaired_success_count": 0,
+        "validation_failure_count": 0,
+        "final_success_count": 0,
+        "excluded_api_error_count": 0,
+        "excluded_timeout_count": 0,
+        "excluded_rate_limit_count": 0,
+        "first_pass_success_rate": 0,
+        "repaired_success_rate": 0,
+        "final_success_rate": 0,
+        "repair_trigger_rate": 0
+    }
+}

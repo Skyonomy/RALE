@@ -9,3 +9,44 @@ venv/
 __pycache__/
 *.pyc
 .DS_Store
+
+# Auxiliary Documentation and Internal Scripts (Hidden from Git)
+*.md
+!README.md
+memory/
+*.py
+!app.py
+!database.py
+!requirements.txt
+agents/
+tools/
+scripts/
+!agents/**
+!tools/**
+!scripts/**
+
+# Exclude specific internal scripts from root
+analyze_batches.py
+batch_runner_normal.py
+batch_runner.py
+benchmark_cloud_run.py
+check_image.py
+diagnostic_run.py
+final_benchmark.py
+force_cache.py
+regenerate_cache.py
+restore_logs.py
+test_compositor.py
+wipe_benchmark_data.py
+wipe_db.py
+
+# Logs and Dumps
+*.log
+*.txt
+!requirements.txt
+*.png
+!test_image.png
+
+# Binaries
+cloud-sql-proxy
+
