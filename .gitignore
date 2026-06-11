@@ -13,6 +13,7 @@ __pycache__/
 # Auxiliary Documentation and Internal Scripts (Hidden from Git)
 *.md
 !README.md
+*.pdf
 memory/
 *.py
 !app.py
@@ -36,6 +37,7 @@ final_benchmark.py
 force_cache.py
 regenerate_cache.py
 restore_logs.py
+run_remaining.sh
 test_compositor.py
 wipe_benchmark_data.py
 wipe_db.py
@@ -49,4 +51,3 @@ wipe_db.py
 
 # Binaries
 cloud-sql-proxy
-

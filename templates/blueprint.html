@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RALE | Full Pipeline Blueprint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/css/custom.css"/>
+</head>
+<body class="blueprint-view font-sans m-0 p-0 bg-[#020617]">
+    
+    <a href="/" class="absolute top-6 left-6 z-50 text-teal-400 hover:text-white font-black text-[10px] uppercase tracking-widest border border-teal-500/30 px-4 py-2 bg-slate-900/80 backdrop-blur-md flex items-center gap-2 transition-all hover:bg-slate-800 rounded-lg shadow-xl cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        <span>Back to Command Center</span>
+    </a>
+
+    <div id="mermaidGraph" class="w-full h-full">
+        <!-- paste the evaluated html -->
+        <div id="dagWrapper" class="w-full relative select-none transition-all duration-500 text-slate-200">
+            <!-- Active Route Indicator Badge -->
+            <div class="flex justify-center w-full mb-8">
+                <div class="bg-teal-500/10 text-teal-400 border border-teal-500/20 px-6 py-2 rounded-full text-center text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(20,184,166,0.2)] flex items-center gap-2.5 whitespace-nowrap backdrop-blur-sm">
+                    <span class="w-2.5 h-2.5 bg-teal-500 animate-pulse rounded-full"></span>
+                    <span>Theoretical Flow: Full Bounded Self-Healing Pipeline Blueprint</span>
+                </div>
+            </div>
+
+            <div id="dagGrid" class="flex flex-col gap-6 items-center w-full max-w-5xl mx-auto">
+                <!-- PILLAR 1: INITIATION -->
+                <div id="dagPillar1" class="flex flex-col items-center relative z-20 w-full max-w-sm shrink-0">
+                    <!-- Scenario Input -->
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold px-6 py-3 rounded-lg border border-blue-400 text-[10px] tracking-wider uppercase shadow-[0_0_20px_rgba(79,70,229,0.4)] whitespace-nowrap relative z-10 w-full text-center">
+                        📥 Scenario Intent Input
+                    </div>
+                    
+                    <svg class="h-8 w-6 text-indigo-500 animate-pulse my-2" viewBox="0 0 24 32">
+                        <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4"/>
+                        <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                    </svg>
+
+                    <!-- Orchestrator Node -->
+                    <div class="bg-slate-900 border-2 border-indigo-500 px-6 py-4 rounded-xl shadow-[0_0_25px_rgba(99,102,241,0.3)] text-center w-full relative z-10">
+                        <h4 class="text-xs font-black uppercase text-indigo-400 tracking-widest mb-1">🤖 ADK Orchestrator Node</h4>
+                        <p class="text-[9px] text-slate-400 font-bold leading-tight">SequentialAgent Spine & Dynamic Edge Router</p>
+                    </div>
+                    
+                    <!-- FS Right Connection Line -->
+                    <div class="hidden fs-show absolute top-1/2 -right-[50px] w-[50px] -translate-y-1/2 z-0">
+                        <svg class="w-full h-6 text-indigo-500 animate-pulse" viewBox="0 0 100 24" preserveAspectRatio="none">
+                            <line x1="0" y1="12" x2="100" y2="12" stroke="currentColor" stroke-width="4" stroke-dasharray="6"/>
+                            <polygon points="100,12 90,6 90,18" fill="currentColor"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Normal Mode Down Arrow 1 to 2 -->
+                <svg class="h-8 w-6 text-indigo-500 animate-pulse fs-hide" viewBox="0 0 24 32">
+                    <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4"/>
+                    <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                </svg>
+
+                <!-- PILLAR 2: THE LOOP -->
+                <div id="dagPillar2" class="bg-slate-950/80 border border-slate-700/50 p-6 sm:p-8 w-full max-w-2xl relative shadow-[0_0_40px_rgba(15,23,42,0.9)] z-10 flex flex-col items-center rounded-2xl ring-1 ring-white/5 shrink-0">
+                    <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900 border border-teal-500/40 px-6 py-1 text-[9px] font-bold text-teal-400 uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(20,184,166,0.2)] whitespace-nowrap">
+                        🔄 Bounded Detect-Reject-Repair Loop
+                    </span>
+
+                    <div class="flex flex-col items-center gap-4 w-full mt-2">
+                        <!-- Artist & Reviewer -->
+                        <div class="flex flex-col fs-flex-row items-center gap-4 w-full justify-center">
+                            <div class="bg-slate-900 border-2 border-emerald-500/80 p-3.5 rounded-xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(16,185,129,0.15)] w-44 shrink-0">
+                                <span class="text-lg">🎨</span>
+                                <span class="text-[11px] font-black uppercase text-emerald-400 mt-1.5">1. ARTIST</span>
+                                <span class="text-[8px] text-slate-500 mt-0.5">Imagen 4.0</span>
+                            </div>
+
+                            <svg class="h-6 w-6 text-emerald-500 animate-pulse fs-rotate shrink-0" viewBox="0 0 24 32">
+                                <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2"/>
+                                <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                            </svg>
+
+                            <div class="bg-slate-900 border-2 border-emerald-500/80 p-3.5 rounded-xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(16,185,129,0.15)] w-44 shrink-0">
+                                <span class="text-lg">👁️</span>
+                                <span class="text-[11px] font-black uppercase text-emerald-400 mt-1.5">2. REVIEWER</span>
+                                <span class="text-[8px] text-slate-500 mt-0.5">Multimodal MQA</span>
+                            </div>
+                        </div>
+
+                        <svg class="h-6 w-6 text-emerald-500 animate-pulse shrink-0" viewBox="0 0 24 32">
+                            <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2"/>
+                            <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                        </svg>
+
+                        <!-- Miner & Auditor -->
+                        <div class="flex flex-col fs-flex-row items-center gap-4 w-full justify-center relative">
+                            <div class="relative bg-slate-900 border-2 border-emerald-500/60 bg-emerald-950/20 p-3.5 rounded-xl flex flex-col items-center text-center shadow-md w-44 shrink-0">
+                                <span class="absolute -top-2.5 -right-2 bg-teal-600 text-slate-950 text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-wider whitespace-nowrap">ACTIVE NODE</span>
+                                <span class="text-lg">🔍</span>
+                                <span class="text-[11px] font-black uppercase text-emerald-400 mt-1.5">3. MINER</span>
+                                <span class="text-[8px] text-slate-500 mt-0.5">Gemini 2.5 Flash</span>
+                            </div>
+
+                            <svg class="h-6 w-6 text-emerald-500 animate-pulse fs-rotate shrink-0" viewBox="0 0 24 32">
+                                <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2"/>
+                                <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                            </svg>
+
+                            <div class="border-2 rounded-xl border-emerald-500 bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.2)] p-3.5 flex flex-col items-center text-center w-44 shrink-0">
+                                <span class="text-lg">⚖️</span>
+                                <span class="text-[11px] font-black uppercase text-emerald-400 mt-1.5">4. AUDITOR</span>
+                                <span class="text-[8px] text-slate-500 mt-0.5">@tools/adk_tools.py</span>
+                            </div>
+
+                            <!-- FS Right Connection Line from Auditor -> Pillar 3 -->
+                            <div class="hidden fs-show absolute top-1/2 -right-[50px] w-[50px] -translate-y-1/2 z-0">
+                                <svg class="w-full h-6 text-emerald-500 animate-pulse" viewBox="0 0 100 24" preserveAspectRatio="none">
+                                    <line x1="0" y1="12" x2="100" y2="12" stroke="currentColor" stroke-width="4"/>
+                                    <polygon points="100,12 90,6 90,18" fill="currentColor"/>
+                                </svg>
+                                <span class="absolute -top-4 left-1/2 -translate-x-1/2 text-[8px] font-black text-emerald-500 uppercase bg-[#020617] px-1">PASS</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- REJECT PATH -> PLAYWRIGHT -->
+                    <div class="w-full mt-6 pt-6 border-t border-slate-700/80 flex flex-col items-center relative">
+                        <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[8px] font-black text-rose-500 uppercase bg-slate-900 px-2 rounded">REJECT</span>
+                        <svg class="h-6 w-6 text-rose-500 animate-pulse mb-3" viewBox="0 0 24 32">
+                            <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2"/>
+                            <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                        </svg>
+
+                        <div class="bg-amber-950/30 border-2 border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.3)] rounded-xl p-4 flex flex-col items-center text-center relative w-full max-w-[280px] z-10 transition-all duration-300">
+                            <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-950 text-[8px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap">
+                                🛠️ ACTIVE (SELF-HEAL)
+                            </span>
+                            <span class="text-xl mt-2">🛠️</span>
+                            <h5 class="text-[11px] font-black text-amber-400 uppercase mt-1.5">5a. PLAYWRIGHT</h5>
+                            <span class="text-[8px] text-slate-400 font-bold">Gemini 2.5 Pro (Repair)</span>
+                            <p class="text-[9px] text-slate-300 mt-2 leading-tight">Reads GRC errors and surgically recalculates coordinates</p>
+                            
+                            <div class="mt-4 flex items-center justify-center gap-1.5 text-amber-500 animate-pulse font-black text-[9px] bg-black/20 px-3 py-1.5 rounded-full border border-white/5">
+                                <span>🔁 Loopback to MINER</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Normal Mode Down Arrow 2 to 3 -->
+                <div class="flex flex-col items-center fs-hide w-full relative">
+                    <span class="bg-emerald-950 text-emerald-500 text-[8px] font-black px-2 py-0.5 border border-emerald-500/30 rounded z-10 mb-1">PASS</span>
+                    <svg class="h-8 w-6 text-emerald-500 animate-pulse" viewBox="0 0 24 32">
+                        <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5"/>
+                        <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                    </svg>
+                </div>
+
+                <!-- PILLAR 3: OUTPUT -->
+                <div id="dagPillar3" class="flex flex-col items-center relative z-20 w-full max-w-sm shrink-0">
+                    
+                    <!-- Specialist Agent -->
+                    <div class="border-2 border-emerald-500 bg-emerald-950/20 p-4 rounded-xl flex flex-col items-center text-center relative w-full shadow-[0_0_20px_rgba(16,185,129,0.2)] z-10">
+                        <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-emerald-500 text-slate-950 text-[8px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap">
+                            ✅ PASS (Factual & Spatial)
+                        </span>
+                        <span class="text-xl mt-2">✍️</span>
+                        <h5 class="text-[11px] font-black text-emerald-400 uppercase mt-1.5">5b. SPECIALIST</h5>
+                        <span class="text-[8px] text-slate-400 font-bold">Gemini 2.5 Flash</span>
+                        <p class="text-[9px] text-slate-300 mt-2">Ingests validated script & generates 5 verified MCQs</p>
+                    </div>
+
+                    <svg class="h-8 w-6 text-teal-500 animate-pulse my-3" viewBox="0 0 24 32">
+                        <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4"/>
+                        <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                    </svg>
+
+                    <!-- Sync Engine -->
+                    <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl w-full relative shadow-xl flex flex-col items-center">
+                        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-600 px-4 py-0.5 text-[9px] font-bold text-teal-400 uppercase tracking-widest rounded-full whitespace-nowrap">
+                            🔄 Sync Engine
+                        </span>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4 w-full mt-2 justify-center">
+                            <div class="bg-slate-950 border border-slate-800 p-3 rounded-lg flex flex-col items-center text-center w-full shadow-inner">
+                                <span class="text-lg">🖼️</span>
+                                <span class="text-[9px] font-black uppercase text-emerald-400 mt-1.5">Forensic Compositor</span>
+                            </div>
+                            <div class="bg-slate-950 border border-slate-800 p-3 rounded-lg flex flex-col items-center text-center w-full shadow-inner">
+                                <span class="text-lg">🎙️</span>
+                                <span class="text-[9px] font-black uppercase text-emerald-400 mt-1.5">Audio Engine (TTS)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <svg class="h-8 w-6 text-emerald-500 animate-pulse my-3" viewBox="0 0 24 32">
+                        <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5"/>
+                        <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                    </svg>
+
+                    <!-- Output Box -->
+                    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black px-6 py-4 rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.5)] border-2 border-emerald-300 text-[11px] tracking-widest uppercase text-center w-full">
+                        🏆 Verified IELTS Exam Artifact
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

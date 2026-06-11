@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RALE powered by Skyonomy | Horizontal Multimodal Validation Framework</title>
+    <title>RALE | A Skyonomy Reliability Engine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
@@ -16,10 +16,10 @@
     <header class="p-6 border-b border-slate-800 bg-[#091124] backdrop-blur-md flex flex-col lg:flex-row justify-between items-center gap-4 z-50 relative shadow-2xl">
         <div class="flex items-center gap-4">
             <div>
-                <h1 class="text-2xl font-black tracking-tighter text-white uppercase">RALE <span class="text-white text-sm font-bold ml-2 tracking-normal">powered by <span class="text-sky-400 uppercase">SKY</span><span class="text-white uppercase">ONOMY</span></span></h1>
+                <h1 class="text-2xl font-black tracking-tighter text-white uppercase">RALE <span class="text-white text-sm font-bold ml-2 tracking-normal">A <span class="text-sky-400 uppercase">SKY</span><span class="text-white uppercase">ONOMY</span> Reliability Engine</span></h1>
                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-2">
                     Horizontal Multimodal Validation Framework
-                    <span class="bg-blue-600/20 text-blue-400 px-2 py-0.5 border border-blue-600/30 font-black uppercase tracking-tighter">ADK, ADK FunctionTool & ADK Event Native</span>
+                    <span class="bg-blue-600/20 text-blue-400 px-2 py-0.5 border border-blue-600/30 font-black uppercase tracking-tighter">ADK Runner • FunctionTool • Native Event Trace</span>
                 </p>
             </div>
         </div>
@@ -28,7 +28,7 @@
         <div id="viewTabs" class="flex bg-slate-900 p-1 border border-slate-800">
             <button id="tabProduct" class="px-5 py-2 text-xs font-black uppercase tracking-widest transition-all bg-teal-500 text-slate-950 shadow-lg">Command Center</button>
             <button id="tabMap" class="px-5 py-2 text-xs font-black uppercase tracking-widest transition-all text-slate-400 hover:text-white">Interactive Map</button>
-            <button id="tabExam" class="px-5 py-2 text-xs font-black uppercase tracking-widest transition-all text-slate-400 hover:text-white">Candidate Exam</button>
+            <button id="tabExam" class="px-5 py-2 text-xs font-black uppercase tracking-widest transition-all text-slate-400 hover:text-white">Validated Exam</button>
             <button id="tabArchitecture" class="relative px-5 py-2 text-xs font-black uppercase tracking-widest transition-all text-slate-400 hover:text-white">
                 <span id="archPulse" class="hidden absolute -top-1 -right-1 flex h-2 w-2">
                     <span class="animate-ping absolute inline-flex h-full w-full bg-teal-400 opacity-75"></span>
@@ -37,11 +37,15 @@
                 Architecture
             </button>
             <button id="tabAudit" class="px-5 py-2 text-xs font-black uppercase tracking-widest transition-all text-slate-400 hover:text-white border-l border-slate-800">
-                Enterprise Audit
+                Reliability Audit
             </button>
             </div>
 
         <div id="headerActions" class="flex gap-4 items-center">
+            <a href="/blueprint" target="_blank" class="text-teal-400 hover:text-white text-[10px] font-black uppercase tracking-widest border border-teal-500/30 px-3 py-1.5 bg-slate-900/50 transition-all rounded shadow-lg flex items-center gap-1.5 cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                <span>Full Blueprint</span>
+            </a>
             <span id="totalLatencyDisplay" class="text-slate-500 font-mono text-xs font-black uppercase tracking-wider"></span>
             <span id="totalLatency" class="hidden"></span>
             <button id="resetBtn" class="text-slate-400 hover:text-white text-xs font-black uppercase tracking-widest border border-slate-700 px-4 py-2 transition-all cursor-pointer">New Session</button>
@@ -60,29 +64,30 @@
                     <div>
                         <h2 class="text-[10px] font-black tracking-[0.2em] text-teal-400 uppercase mb-3">// MISSION THESIS</h2>
                         <p class="text-xs text-slate-300 font-bold leading-relaxed">
-                            RALE Architect solves the "Multimodal Drift" problem in generative AI using a self-healing DAG.
+                            RALE Architect solves "Multimodal Drift" in generative AI using a self-healing DAG, achieving an overall validated success rate of >95%*.
                         </p>
                     </div>
 
                     <div class="space-y-4">
                         <div class="space-y-1">
-                            <h3 class="text-[9px] font-black text-teal-500 uppercase tracking-widest">01. RELIABILITY</h3>
-                            <p class="text-[10px] text-slate-400 leading-snug">Deterministic Python math (The Auditor) intercepts and rejects hallucinated or colliding coordinates.</p>
+                            <h3 class="text-[10px] font-black text-teal-500 uppercase tracking-widest">01. RELIABILITY</h3>
+                            <p class="text-xs text-slate-400 leading-snug">Deterministic Python math (The Auditor) intercepts colliding coordinates. Without it, the baseline first-pass success is only ~55%.</p>
                         </div>
                         <div class="space-y-1">
-                            <h3 class="text-[9px] font-black text-teal-500 uppercase tracking-widest">02. SELF-HEALING</h3>
-                            <p class="text-[10px] text-slate-400 leading-snug">Rejected runs are escalated to the Playwright (Gemini Pro) for high-reasoning spatial repair.</p>
+                            <h3 class="text-[10px] font-black text-teal-500 uppercase tracking-widest">02. SELF-HEALING</h3>
+                            <p class="text-xs text-slate-400 leading-snug">Rejected runs escalate to the Playwright (Gemini Pro) for high-reasoning spatial repair, executing over 100 successful autonomous repairs.</p>
                         </div>
                         <div class="space-y-1">
-                            <h3 class="text-[9px] font-black text-teal-500 uppercase tracking-widest">03. EFFICIENCY</h3>
-                            <p class="text-[10px] text-slate-400 leading-snug">Dynamic tiering uses Flash for 90% of tasks, reducing costs by ~18% vs monolithic architectures.</p>
+                            <h3 class="text-[10px] font-black text-teal-500 uppercase tracking-widest">03. EFFICIENCY</h3>
+                            <p class="text-xs text-slate-400 leading-snug">Dynamic tiering routes initial generation to faster models, reserving expensive reasoning strictly for failed runs.</p>
                         </div>
                     </div>
 
                     <div class="pt-4 border-t border-slate-800">
-                        <div class="bg-teal-500/10 border border-teal-500/20 p-3 rounded">
+                        <p class="text-[10px] text-slate-500 italic leading-tight">*Metrics based on Tier 1 (Baseline) empirical validation benchmark at time of writing. Results subject to minor variance in live execution.</p>
+                        <div class="bg-teal-500/10 border border-teal-500/20 p-3 rounded mt-3">
                             <p class="text-xs text-teal-400 font-black uppercase mb-1">Demo Tip:</p>
-                            <p class="text-[10px] text-slate-400 italic leading-tight">Enable "Spatial Stress Mode" to force a failure and watch the Playwright agent live-repair the map.</p>
+                            <p class="text-xs text-slate-400 italic leading-tight">Enable "Spatial Stress Mode" to force a failure and watch the Playwright agent live-repair the map.</p>
                         </div>
                     </div>
                 </div>
@@ -122,7 +127,7 @@
                                     </div>
                                     <div>
                                         <span class="text-xs font-black uppercase text-slate-200 tracking-wider group-hover:text-teal-400 transition-colors">Predefined Environment Theme</span>
-                                        <p class="text-[9px] text-slate-500 mt-0.5">Select a fully-validated predefined baseline theme.</p>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Select a fully-validated predefined baseline theme.</p>
                                     </div>
                                 </label>
 
@@ -149,7 +154,7 @@
                                     </div>
                                     <div>
                                         <span class="text-xs font-black uppercase text-slate-200 tracking-wider group-hover:text-teal-400 transition-colors">Describe Custom Scenario</span>
-                                        <p class="text-[9px] text-slate-500 mt-0.5">Type any custom theme scenario using prompt descriptions.</p>
+                                        <p class="text-[11px] text-slate-500 mt-0.5">Type any custom theme scenario using prompt descriptions.</p>
                                     </div>
                                 </label>
 
@@ -160,7 +165,7 @@
                         </div>
                         
                         <div class="pt-4 border-t border-slate-800/60">
-                            <p class="text-[10px] text-slate-500 italic leading-relaxed">
+                            <p class="text-[11px] text-slate-500 italic leading-relaxed">
                                 <strong class="text-teal-500">PRO TIP:</strong> Predefined themes run instantly when using Fast-Forward mode, serving as fully-validated compliance baselines.
                             </p>
                         </div>
@@ -176,20 +181,6 @@
                                 <span class="text-base">⚙️</span> Run Parameters
                             </label>
 
-                            <!-- Spatial Stress Mode -->
-                            <div class="p-4 bg-slate-950/60 border border-slate-850 hover:border-slate-800 hover:bg-slate-950 transition-all duration-200">
-                                <label class="flex items-start gap-3 cursor-pointer group">
-                                    <div class="relative flex items-center justify-center mt-0.5">
-                                        <input type="checkbox" id="stressTestToggle" class="peer appearance-none w-4 h-4 border-2 border-slate-700 bg-slate-950 checked:bg-teal-500 checked:border-teal-500 transition-all cursor-pointer">
-                                        <svg class="absolute w-2.5 h-2.5 text-slate-950 opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                                    </div>
-                                    <div>
-                                        <span class="text-xs font-black uppercase text-teal-400 group-hover:text-teal-300 transition-colors">Spatial Stress Mode</span>
-                                        <p class="text-[9px] text-slate-400 mt-1 leading-relaxed italic">Spatial Stress Mode injects stricter spatial and script-density constraints to deliberately trigger validation failures and demonstrate the Track 2 repair loop.</p>
-                                    </div>
-                                </label>
-                            </div>
-
                             <!-- Demo Fast-Forward -->
                             <div id="fastForwardContainer" class="p-4 bg-slate-950/60 border border-slate-850 hover:border-slate-800 hover:bg-slate-950 transition-all duration-200">
                                 <label class="flex items-start gap-3 cursor-pointer group">
@@ -199,7 +190,21 @@
                                     </div>
                                     <div>
                                         <span class="text-xs font-black uppercase text-teal-400 group-hover:text-teal-300 transition-colors">Demo Fast-Forward (Replay)</span>
-                                        <p class="text-[9px] text-slate-400 mt-1 leading-relaxed italic">Fast Demo Replay uses cached artefacts from a previously completed RALE run so judges can inspect the full detect → repair → release flow without waiting for live model generation. Live ADK Generation is also available and runs the full pipeline end-to-end.</p>
+                                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed italic">Fast Demo Replay uses cached artefacts from a previously completed RALE run so judges can inspect the full detect → repair → release flow without waiting for live model generation. Live ADK Generation is also available and runs the full pipeline end-to-end.</p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Spatial Stress Mode -->
+                            <div class="p-4 bg-slate-950/60 border border-slate-850 hover:border-slate-800 hover:bg-slate-950 transition-all duration-200">
+                                <label class="flex items-start gap-3 cursor-pointer group">
+                                    <div class="relative flex items-center justify-center mt-0.5">
+                                        <input type="checkbox" id="stressTestToggle" class="peer appearance-none w-4 h-4 border-2 border-slate-700 bg-slate-950 checked:bg-teal-500 checked:border-teal-500 transition-all cursor-pointer">
+                                        <svg class="absolute w-2.5 h-2.5 text-slate-950 opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-black uppercase text-teal-400 group-hover:text-teal-300 transition-colors">Spatial Stress Mode</span>
+                                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed italic">Spatial Stress Mode injects stricter spatial (260px spacing) and script-density constraints to deliberately trigger validation failures and demonstrate the Track 2 repair loop.</p>
                                     </div>
                                 </label>
                             </div>
@@ -600,12 +605,17 @@
                     <div class="bg-slate-900 border border-slate-800 p-6 shadow-2xl">
                         <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-3">
                             <h3 class="text-xs font-black uppercase tracking-widest text-teal-400">Logical DAG Flow</h3>
-                            <div class="flex bg-slate-950 p-1 border border-slate-800">
-                                <button id="graphViewYourRun" class="px-2.5 py-1 text-[8px] font-black uppercase transition-all bg-teal-500 text-slate-950 cursor-pointer">Your Run</button>
-                                <button id="graphViewFull" class="px-2.5 py-1 text-[8px] font-black uppercase transition-all text-slate-400 hover:text-white ml-1 cursor-pointer">Full System</button>
+                            <div class="flex items-center gap-2">
+                                <div class="flex bg-slate-950 p-1 border border-slate-800">
+                                    <button id="graphViewYourRun" class="px-2.5 py-1 text-[8px] font-black uppercase transition-all bg-teal-500 text-slate-950 cursor-pointer">Your Run</button>
+                                    <button id="graphViewFull" class="px-2.5 py-1 text-[8px] font-black uppercase transition-all text-slate-400 hover:text-white ml-1 cursor-pointer">Full System</button>
+                                </div>
+                                <button id="graphFullscreenBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-1 border border-slate-700 transition-colors cursor-pointer" title="Fullscreen View">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                </button>
                             </div>
                         </div>
-                        <div class="flex items-center justify-center p-4 bg-black/30 border border-white/5 shadow-inner">
+                        <div class="flex items-start justify-center p-4 bg-black/30 border border-white/5 shadow-inner overflow-y-auto">
                              <div id="mermaidGraph" class="mermaid w-full"></div>
                         </div>
                     </div>

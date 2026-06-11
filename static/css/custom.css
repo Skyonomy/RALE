@@ -89,3 +89,75 @@
     animation: pulse-glow 2s infinite;
     border-width: 2px !important;
 }
+
+/* Advanced 3-Pillar Fullscreen Landscape Layout */
+:fullscreen, .blueprint-view {
+    background-color: #020617 !important;
+    overflow: hidden !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:fullscreen #mermaidGraph, .blueprint-view #mermaidGraph {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:fullscreen #dagWrapper, .blueprint-view #dagWrapper {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2rem 4rem;
+    background: radial-gradient(circle at center, rgba(15, 23, 42, 0.4) 0%, #020617 100%);
+    background-image: radial-gradient(rgba(45, 212, 191, 0.05) 2px, transparent 2px);
+    background-size: 40px 40px;
+    box-sizing: border-box;
+}
+
+:fullscreen #dagGrid, .blueprint-view #dagGrid {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 3rem !important;
+    height: 100%;
+    max-width: 1600px !important;
+    width: 100%;
+}
+
+:fullscreen #dagPillar1, 
+:fullscreen #dagPillar2, 
+:fullscreen #dagPillar3,
+.blueprint-view #dagPillar1, 
+.blueprint-view #dagPillar2, 
+.blueprint-view #dagPillar3 {
+    justify-content: center !important;
+}
+
+:fullscreen .fs-hide, .blueprint-view .fs-hide {
+    display: none !important;
+}
+
+:fullscreen .fs-show, .blueprint-view .fs-show {
+    display: block !important;
+}
+
+:fullscreen .fs-flex-row, .blueprint-view .fs-flex-row {
+    flex-direction: row !important;
+}
+
+:fullscreen .fs-rotate, .blueprint-view .fs-rotate {
+    transform: rotate(-90deg) !important;
+}
+
+/* Dynamic uniform scaling to ensure the 3 columns never break bounds on smaller laptop screens */
+@media (max-width: 1400px), (max-height: 800px) {
+    :fullscreen #dagGrid, .blueprint-view #dagGrid {
+        transform: scale(min(1, calc(100vw / 1400), calc(100vh / 800)));
+        transform-origin: center center;
+    }
+}

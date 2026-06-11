@@ -1,14 +1,10 @@
 #!/bin/bash
-URL="https://rale.skyonomy.com/"
-CONCURRENCY=4
+URL="https://rale-service-128635617414.us-central1.run.app"
 
-echo "Starting Tier 1: Normal (140px) - 100 runs..."
-python3 benchmark_cloud_run.py $URL --mode normal --runs 100 --concurrency $CONCURRENCY
+echo "Starting Tier 2: Robustness (200px) - Target 100 Total..."
+python3 -u final_benchmark.py $URL --mode constrained --target 100
 
-echo "Starting Tier 2: Constrained (200px) - 100 runs..."
-python3 benchmark_cloud_run.py $URL --mode constrained --runs 100 --concurrency $CONCURRENCY
+echo "Starting Tier 3: Failure Boundary (260px) - Target 100 Total..."
+python3 -u final_benchmark.py $URL --mode stress --target 100
 
-echo "Starting Tier 3: Stress (260px) - 100 runs..."
-python3 benchmark_cloud_run.py $URL --mode stress --runs 100 --concurrency $CONCURRENCY
-
-echo "All tiers complete."
+echo "All tiers complete. Clean data ready for submission."

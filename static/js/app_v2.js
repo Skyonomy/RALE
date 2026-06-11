@@ -791,7 +791,7 @@ function renderFinalUI(data, duration) {
         latVal.innerText = duration;
     }
 
-    state.studentImg = data.teacher_image_b64 ? ("data:image/png;base64," + data.teacher_image_b64) : data.image_url;
+    state.studentImg = data.student_image_b64 ? ("data:image/png;base64," + data.student_image_b64) : (data.teacher_image_b64 ? ("data:image/png;base64," + data.teacher_image_b64) : data.image_url);
     state.agentImg = data.teacher_image_b64 ? ("data:image/png;base64," + data.teacher_image_b64) : data.image_url;
     state.visionData = data.vision_result;
     state.words = data.words || [];
@@ -1155,7 +1155,11 @@ async function runGeneration() {
         const res = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ scenario, stress_test: isStressTest, run_id: state.run_id })
+            body: JSON.stringify({ 
+                scenario, 
+                spatial_regime: isStressTest ? 'stress' : 'normal', 
+                run_id: state.run_id 
+            })
         });
         const data = await res.json();
         clearInterval(pollInterval);
@@ -1173,11 +1177,26 @@ async function runGeneration() {
         document.getElementById('resetBtn').classList.remove('hidden');
 
     } catch (e) {
-        alert("Generation Failed: " + e.message);
         document.getElementById('archPulse').classList.add('hidden');
         processBtn.disabled = false;
         document.getElementById('btnSpinner').classList.add('hidden');
         document.getElementById('traceLog').innerHTML += `<div class="text-rose-500 font-bold mb-4 uppercase text-[10px]">// DAG TERMINATED SAFELY: ${e.message}</div>`;
+        
+        // Graceful Fail Escape Hatch
+        document.getElementById('rightSidebar').innerHTML = `
+            <div class="bg-[#091124] border border-rose-500/50 p-6 shadow-2xl flex-1 flex flex-col justify-center items-center text-center animate__animated animate__fadeIn h-full">
+                <div class="bg-rose-500/20 text-rose-400 p-4 rounded-full mb-4">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-sm font-black uppercase tracking-widest text-white mb-2">Generation Failed</h3>
+                <p class="text-xs text-slate-300 mb-6 leading-relaxed">The model failed to respond within the timeout window, or a fatal error occurred. The DAG could not recover.</p>
+                <p class="text-[9px] text-rose-400 font-mono mb-6 bg-black/40 px-3 py-2 border border-rose-500/30 overflow-x-auto w-full">${e.message}</p>
+                <button onclick="location.reload()" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-3 font-black text-xs uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center gap-2 cursor-pointer w-full justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Start Over
+                </button>
+            </div>
+        `;
     }
 }
 
@@ -1319,205 +1338,211 @@ function renderDAG(viewMode) {
     if (!graphEl) return;
 
     graphEl.innerHTML = `
-<div class="w-full flex flex-col items-center gap-4 py-6 text-slate-200 relative overflow-x-auto select-none">
+<div id="dagWrapper" class="w-full relative select-none transition-all duration-500 text-slate-200">
     
     <!-- Active Route Indicator Badge -->
-    ${isFull ? `
-    <div class="bg-teal-500/10 text-teal-400 border border-teal-500/20 px-5 py-3 text-center text-[10px] font-black uppercase tracking-widest mb-4 shadow-[0_0_20px_rgba(20,184,166,0.15)] flex items-center gap-2.5">
-        <span class="w-2.5 h-2.5 bg-teal-500 animate-pulse"></span>
-        <span>Theoretical Flow: Full Bounded Self-Healing Pipeline Blueprint</span>
-    </div>
-    ` : (isHealed ? `
-    <div class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-5 py-3 text-center text-[10px] font-black uppercase tracking-widest mb-4 animate-pulse shadow-[0_0_20px_rgba(245,158,11,0.15)] flex items-center gap-2.5">
-        <span class="w-2.5 h-2.5 bg-amber-500 animate-ping"></span>
-        <span>Escalation Active: Bounded Pro-Tier Self-Healing Loop Engaged</span>
-    </div>
-    ` : `
-    <div class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-5 py-3 text-center text-[10px] font-black uppercase tracking-widest mb-4 shadow-[0_0_20px_rgba(16,185,129,0.15)] flex items-center gap-2.5">
-        <span class="w-2.5 h-2.5 bg-emerald-500"></span>
-        <span>Direct Path Active: First-Pass GRC Approved (Economy Tier Cost-Savings)</span>
-    </div>
-    `)}
-
-    <!-- 1. TOP ROW: Intent & Orchestrator -->
-    <div class="flex flex-col items-center relative z-20">
-        <!-- Scenario Input -->
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold px-6 py-2.5 border border-blue-400 text-xs tracking-wider uppercase shadow-lg">
-            📥 Scenario Intent Input
+    <div class="flex justify-center w-full mb-8">
+        ${isFull ? `
+        <div class="bg-teal-500/10 text-teal-400 border border-teal-500/20 px-6 py-2 rounded-full text-center text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(20,184,166,0.2)] flex items-center gap-2.5 whitespace-nowrap backdrop-blur-sm">
+            <span class="w-2.5 h-2.5 bg-teal-500 animate-pulse rounded-full"></span>
+            <span>Theoretical Flow: Full Bounded Self-Healing Pipeline Blueprint</span>
         </div>
+        ` : (isHealed ? `
+        <div class="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-6 py-2 rounded-full text-center text-[10px] font-black uppercase tracking-widest animate-pulse shadow-[0_0_20px_rgba(245,158,11,0.2)] flex items-center gap-2.5 whitespace-nowrap backdrop-blur-sm">
+            <span class="w-2.5 h-2.5 bg-amber-500 animate-ping rounded-full"></span>
+            <span>Escalation Active: Bounded Pro-Tier Self-Healing Loop Engaged</span>
+        </div>
+        ` : `
+        <div class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-6 py-2 rounded-full text-center text-[10px] font-black uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.2)] flex items-center gap-2.5 whitespace-nowrap backdrop-blur-sm">
+            <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full"></span>
+            <span>Direct Path Active: First-Pass GRC Approved (Economy Tier Cost-Savings)</span>
+        </div>
+        `)}
+    </div>
+
+    <div id="dagGrid" class="flex flex-col gap-6 items-center w-full max-w-5xl mx-auto">
         
-        <!-- Connecting Line to Orchestrator -->
-        <svg class="h-8 w-6 text-indigo-500 animate-pulse" viewBox="0 0 24 32">
-            <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4"/>
-            <polygon points="12,32 8,24 16,24" fill="currentColor"/>
-        </svg>
-
-        <!-- Orchestrator Node -->
-        <div class="bg-slate-900 border-2 border-indigo-500 px-6 py-3 shadow-[0_0_20px_rgba(99,102,241,0.3)] text-center w-80 relative">
-            <h4 class="text-xs font-black uppercase text-indigo-400 tracking-widest mb-1">🤖 ADK Orchestrator Node</h4>
-            <p class="text-[9px] text-slate-400 font-bold leading-tight">SequentialAgent Spine & Dynamic Edge Router</p>
-        </div>
-
-        <!-- Connecting Line to Fleet -->
-        <svg class="h-8 w-6 text-indigo-500 animate-pulse" viewBox="0 0 24 32">
-            <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4"/>
-            <polygon points="12,32 8,24 16,24" fill="currentColor"/>
-        </svg>
-    </div>
-
-    <!-- 2. MAIN BODY: The Multi-Agent Fleet Loop -->
-    <div class="bg-slate-950/60 border border-slate-800 p-8 w-full max-w-2xl relative shadow-2xl z-10 flex flex-col items-center">
-        <!-- Subgraph Title -->
-        <span class="absolute -top-3 left-6 bg-slate-900 border border-slate-800 px-4 py-0.5 text-[9px] font-bold text-teal-400 uppercase tracking-widest">
-            🔄 Bounded Detect-Reject-Repair Loop (ADK Fleet)
-        </span>
-
-        <!-- The Vertical Forward Chain (Priority 4 - Fits lg:col-span-4 perfectly without clipping) -->
-        <div class="flex flex-col items-center gap-4 w-full relative">
-            <!-- Artist Agent -->
-            <div class="bg-slate-900 border-2 border-emerald-500/80 p-3.5 flex flex-col items-center text-center shadow-[0_0_15px_rgba(16,185,129,0.15)] w-44 relative z-10">
-                <span class="text-lg">🎨</span>
-                <span class="text-[11px] font-black uppercase text-emerald-400 mt-1.5">1. ARTIST</span>
-                <span class="text-[8px] text-slate-500 mt-0.5">Imagen 3.0</span>
+        <!-- PILLAR 1: INITIATION -->
+        <div id="dagPillar1" class="flex flex-col items-center relative z-20 w-full max-w-sm shrink-0">
+            <!-- Scenario Input -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold px-6 py-3 rounded-lg border border-blue-400 text-[10px] tracking-wider uppercase shadow-[0_0_20px_rgba(79,70,229,0.4)] whitespace-nowrap relative z-10 w-full text-center">
+                📥 Scenario Intent Input
             </div>
-
-            <!-- Connecting Arrow -->
-            <svg class="h-6 w-6 text-emerald-500 animate-pulse" viewBox="0 0 24 32">
-                <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2"/>
-                <polygon points="12,32 8,24 16,24" fill="currentColor"/>
-            </svg>
-
-            <!-- Review Agent (MQA) -->
-            <div class="bg-slate-900 border-2 border-emerald-500/80 p-3.5 flex flex-col items-center text-center shadow-[0_0_15px_rgba(16,185,129,0.15)] w-44 relative z-10">
-                <span class="text-lg">👁️</span>
-                <span class="text-[11px] font-black uppercase text-emerald-400 mt-1.5">2. REVIEWER</span>
-                <span class="text-[8px] text-slate-500 mt-0.5">Multimodal MQA</span>
-            </div>
-
-            <!-- Connecting Arrow -->
-            <svg class="h-6 w-6 text-emerald-500 animate-pulse" viewBox="0 0 24 32">
-                <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2"/>
-                <polygon points="12,32 8,24 16,24" fill="currentColor"/>
-            </svg>
-
-            <!-- Miner Agent -->
-            <div class="relative bg-slate-900 border-2 ${(isHealed && !isFull) ? 'border-rose-500/60 bg-rose-950/10' : 'border-emerald-500/60 bg-emerald-950/10'} p-3.5 flex flex-col items-center text-center shadow-md w-44 relative z-20">
-                ${isFull ? `
-                <span class="absolute -top-2.5 -right-2 bg-teal-600 text-slate-950 text-[7px] font-black px-2 py-0.5 uppercase tracking-wider">ACTIVE NODE</span>
-                ` : (isHealed ? `
-                <span class="absolute -top-2.5 -right-2 bg-rose-600 text-white text-[7px] font-black px-2 py-0.5 uppercase tracking-wider">REJECTED SHIFT</span>
-                ` : `
-                <span class="absolute -top-2.5 -right-2 bg-emerald-600 text-slate-950 text-[7px] font-black px-2 py-0.5 uppercase tracking-wider">PASSED FIRST-TRY</span>
-                `)}
-                <span class="text-lg">🔍</span>
-                <span class="text-[11px] font-black uppercase ${(isHealed && !isFull) ? 'text-rose-400' : 'text-emerald-400'} mt-1.5">3. MINER</span>
-                <span class="text-[8px] text-slate-500 mt-0.5">Gemini 2.5 Flash</span>
-            </div>
-
-            <!-- Connecting Arrow -->
-            <svg class="h-6 w-6 ${(isHealed && !isFull) ? 'text-rose-500' : 'text-emerald-500'} animate-pulse" viewBox="0 0 24 32">
-                <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2"/>
-                <polygon points="12,32 8,24 16,24" fill="currentColor"/>
-            </svg>
-
-            <!-- Auditor Gate -->
-            <div class="border-2 ${(isHealed && !isFull) ? 'border-rose-500 bg-rose-950/20 shadow-[0_0_15px_rgba(244,63,94,0.3)] animate-pulse' : 'border-emerald-500 bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]'} p-3.5 flex flex-col items-center text-center w-44 relative z-10">
-                <span class="text-lg">⚖️</span>
-                <span class="text-[11px] font-black uppercase ${(isHealed && !isFull) ? 'text-rose-400' : 'text-emerald-400'} mt-1.5">4. AUDITOR</span>
-                <span class="text-[8px] text-slate-500 mt-0.5">@tools/adk_tools.py</span>
-            </div>
-        </div>
-
-        <!-- Loopback Routing Paths & Recovery Branches -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full mt-6 pt-6 border-t border-slate-800/60 relative">
             
-            <!-- Playwright Recovery Node (REJECT Branch) -->
-            <div class="${(isHealed || isFull) ? 'bg-amber-950/20 border-2 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.2)]' : 'opacity-30 border-slate-800 text-slate-500 bg-slate-950'} p-4 flex flex-col items-center text-center relative w-full shadow-md z-10 transition-all duration-300">
-                <!-- Status Badge -->
-                <span class="absolute -top-2.5 left-4 ${(isHealed || isFull) ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400'} text-[8px] font-black px-2 py-0.5 uppercase tracking-wider">
-                    ${(isHealed || isFull) ? '🛠️ ACTIVE (SELF-HEAL ACTIVE)' : '💤 DORMANT (Saved Tokens!)'}
-                </span>
-                <span class="text-xl">🛠️</span>
-                <h5 class="text-[10px] font-black ${(isHealed || isFull) ? 'text-amber-400' : 'text-slate-400'} uppercase mt-1.5">5a. PLAYWRIGHT</h5>
-                <span class="text-[8px] text-slate-500 font-bold">Gemini 2.5 Pro (Premium Repair)</span>
-                <p class="text-[8px] text-slate-400 mt-2 max-w-[200px]">Reads GRC errors and surgically recalculates coordinate points</p>
-                
-                <!-- LOOPBACK INDICATOR PATH -->
-                <div class="mt-4 flex items-center justify-center gap-2 ${(isHealed || isFull) ? 'text-amber-500 animate-pulse' : 'text-slate-600'} font-black text-[9px]">
-                    <span>🔁 Loopback (HEAL) to MINER</span>
-                    <svg class="h-4 w-6" viewBox="0 0 24 16">
-                        <path d="M 24,8 L 4,8" stroke="currentColor" stroke-width="2"/>
-                        <polygon points="4,8 10,4 10,12" fill="currentColor"/>
+            <svg class="h-8 w-6 text-indigo-500 animate-pulse my-2" viewBox="0 0 24 32">
+                <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4"/>
+                <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+            </svg>
+
+            <!-- Orchestrator Node -->
+            <div class="bg-slate-900 border-2 border-indigo-500 px-6 py-4 rounded-xl shadow-[0_0_25px_rgba(99,102,241,0.3)] text-center w-full relative z-10">
+                <h4 class="text-xs font-black uppercase text-indigo-400 tracking-widest mb-1">🤖 ADK Orchestrator Node</h4>
+                <p class="text-[9px] text-slate-400 font-bold leading-tight">SequentialAgent Spine & Dynamic Edge Router</p>
+            </div>
+            
+            <!-- FS Right Connection Line -->
+            <div class="hidden fs-show absolute top-1/2 -right-[50px] w-[50px] -translate-y-1/2 z-0">
+                <svg class="w-full h-6 text-indigo-500 animate-pulse" viewBox="0 0 100 24" preserveAspectRatio="none">
+                    <line x1="0" y1="12" x2="100" y2="12" stroke="currentColor" stroke-width="4" stroke-dasharray="6"/>
+                    <polygon points="100,12 90,6 90,18" fill="currentColor"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- Normal Mode Down Arrow 1 to 2 -->
+        <svg class="h-8 w-6 text-indigo-500 animate-pulse fs-hide" viewBox="0 0 24 32">
+            <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4"/>
+            <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+        </svg>
+
+        <!-- PILLAR 2: THE LOOP -->
+        <div id="dagPillar2" class="bg-slate-950/80 border border-slate-700/50 p-6 sm:p-8 w-full max-w-2xl relative shadow-[0_0_40px_rgba(15,23,42,0.9)] z-10 flex flex-col items-center rounded-2xl ring-1 ring-white/5 shrink-0">
+            <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900 border border-teal-500/40 px-6 py-1 text-[9px] font-bold text-teal-400 uppercase tracking-widest rounded-full shadow-[0_0_15px_rgba(20,184,166,0.2)] whitespace-nowrap">
+                🔄 Bounded Detect-Reject-Repair Loop
+            </span>
+
+            <div class="flex flex-col items-center gap-4 w-full mt-2">
+                <!-- Artist & Reviewer -->
+                <div class="flex flex-col fs-flex-row items-center gap-4 w-full justify-center">
+                    <div class="bg-slate-900 border-2 border-emerald-500/80 p-3.5 rounded-xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(16,185,129,0.15)] w-44 shrink-0">
+                        <span class="text-lg">🎨</span>
+                        <span class="text-[11px] font-black uppercase text-emerald-400 mt-1.5">1. ARTIST</span>
+                        <span class="text-[8px] text-slate-500 mt-0.5">Imagen 4.0</span>
+                    </div>
+
+                    <svg class="h-6 w-6 text-emerald-500 animate-pulse fs-rotate shrink-0" viewBox="0 0 24 32">
+                        <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2"/>
+                        <polygon points="12,32 8,24 16,24" fill="currentColor"/>
                     </svg>
+
+                    <div class="bg-slate-900 border-2 border-emerald-500/80 p-3.5 rounded-xl flex flex-col items-center text-center shadow-[0_0_15px_rgba(16,185,129,0.15)] w-44 shrink-0">
+                        <span class="text-lg">👁️</span>
+                        <span class="text-[11px] font-black uppercase text-emerald-400 mt-1.5">2. REVIEWER</span>
+                        <span class="text-[8px] text-slate-500 mt-0.5">Multimodal MQA</span>
+                    </div>
+                </div>
+
+                <svg class="h-6 w-6 text-emerald-500 animate-pulse shrink-0" viewBox="0 0 24 32">
+                    <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2"/>
+                    <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                </svg>
+
+                <!-- Miner & Auditor -->
+                <div class="flex flex-col fs-flex-row items-center gap-4 w-full justify-center relative">
+                    <div class="relative bg-slate-900 border-2 ${(isHealed && !isFull) ? 'border-rose-500/60 bg-rose-950/20' : 'border-emerald-500/60 bg-emerald-950/20'} p-3.5 rounded-xl flex flex-col items-center text-center shadow-md w-44 shrink-0">
+                        ${isFull ? `
+                        <span class="absolute -top-2.5 -right-2 bg-teal-600 text-slate-950 text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-wider whitespace-nowrap">ACTIVE NODE</span>
+                        ` : (isHealed ? `
+                        <span class="absolute -top-2.5 -right-2 bg-rose-600 text-white text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-wider whitespace-nowrap">REJECTED SHIFT</span>
+                        ` : `
+                        <span class="absolute -top-2.5 -right-2 bg-emerald-600 text-slate-950 text-[7px] font-black px-2 py-0.5 rounded uppercase tracking-wider whitespace-nowrap">PASSED FIRST-TRY</span>
+                        `)}
+                        <span class="text-lg">🔍</span>
+                        <span class="text-[11px] font-black uppercase ${(isHealed && !isFull) ? 'text-rose-400' : 'text-emerald-400'} mt-1.5">3. MINER</span>
+                        <span class="text-[8px] text-slate-500 mt-0.5">Gemini 2.5 Flash</span>
+                    </div>
+
+                    <svg class="h-6 w-6 ${(isHealed && !isFull) ? 'text-rose-500' : 'text-emerald-500'} animate-pulse fs-rotate shrink-0" viewBox="0 0 24 32">
+                        <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2"/>
+                        <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                    </svg>
+
+                    <div class="border-2 rounded-xl ${(isHealed && !isFull) ? 'border-rose-500 bg-rose-950/30 shadow-[0_0_20px_rgba(244,63,94,0.4)] animate-pulse' : 'border-emerald-500 bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.2)]'} p-3.5 flex flex-col items-center text-center w-44 shrink-0">
+                        <span class="text-lg">⚖️</span>
+                        <span class="text-[11px] font-black uppercase ${(isHealed && !isFull) ? 'text-rose-400' : 'text-emerald-400'} mt-1.5">4. AUDITOR</span>
+                        <span class="text-[8px] text-slate-500 mt-0.5">@tools/adk_tools.py</span>
+                    </div>
+
+                    <!-- FS Right Connection Line from Auditor -> Pillar 3 -->
+                    <div class="hidden fs-show absolute top-1/2 -right-[50px] w-[50px] -translate-y-1/2 z-0">
+                        <svg class="w-full h-6 text-emerald-500 animate-pulse" viewBox="0 0 100 24" preserveAspectRatio="none">
+                            <line x1="0" y1="12" x2="100" y2="12" stroke="currentColor" stroke-width="4"/>
+                            <polygon points="100,12 90,6 90,18" fill="currentColor"/>
+                        </svg>
+                        <span class="absolute -top-4 left-1/2 -translate-x-1/2 text-[8px] font-black text-emerald-500 uppercase bg-[#020617] px-1">PASS</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Specialist Agent (PASS Branch) -->
-            <div class="border-2 border-emerald-500 bg-emerald-950/10 p-4 flex flex-col items-center text-center relative w-full shadow-md z-10">
-                <!-- Status Badge -->
-                <span class="absolute -top-2.5 left-4 bg-emerald-500 text-slate-950 text-[8px] font-black px-2 py-0.5 uppercase tracking-wider">
+            <!-- REJECT PATH -> PLAYWRIGHT -->
+            <div class="w-full mt-6 pt-6 border-t border-slate-700/80 flex flex-col items-center relative">
+                <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[8px] font-black text-rose-500 uppercase bg-slate-900 px-2 rounded">REJECT</span>
+                <svg class="h-6 w-6 text-rose-500 animate-pulse mb-3" viewBox="0 0 24 32">
+                    <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2"/>
+                    <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+                </svg>
+
+                <div class="${(isHealed || isFull) ? 'bg-amber-950/30 border-2 border-amber-500 shadow-[0_0_25px_rgba(245,158,11,0.3)]' : 'opacity-40 border-slate-800 text-slate-500 bg-slate-950 border-2'} rounded-xl p-4 flex flex-col items-center text-center relative w-full max-w-[280px] z-10 transition-all duration-300">
+                    <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 ${(isHealed || isFull) ? 'bg-amber-500 text-slate-950' : 'bg-slate-800 text-slate-400'} text-[8px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap">
+                        ${(isHealed || isFull) ? '🛠️ ACTIVE (SELF-HEAL)' : '💤 DORMANT (Tokens Saved)'}
+                    </span>
+                    <span class="text-xl mt-2">🛠️</span>
+                    <h5 class="text-[11px] font-black ${(isHealed || isFull) ? 'text-amber-400' : 'text-slate-400'} uppercase mt-1.5">5a. PLAYWRIGHT</h5>
+                    <span class="text-[8px] text-slate-400 font-bold">Gemini 2.5 Pro (Repair)</span>
+                    <p class="text-[9px] text-slate-300 mt-2 leading-tight">Reads GRC errors and surgically recalculates coordinates</p>
+                    
+                    <div class="mt-4 flex items-center justify-center gap-1.5 ${(isHealed || isFull) ? 'text-amber-500 animate-pulse' : 'text-slate-600'} font-black text-[9px] bg-black/20 px-3 py-1.5 rounded-full border border-white/5">
+                        <span>🔁 Loopback to MINER</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Normal Mode Down Arrow 2 to 3 -->
+        <div class="flex flex-col items-center fs-hide w-full relative">
+            <span class="bg-emerald-950 text-emerald-500 text-[8px] font-black px-2 py-0.5 border border-emerald-500/30 rounded z-10 mb-1">PASS</span>
+            <svg class="h-8 w-6 text-emerald-500 animate-pulse" viewBox="0 0 24 32">
+                <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5"/>
+                <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+            </svg>
+        </div>
+
+        <!-- PILLAR 3: OUTPUT -->
+        <div id="dagPillar3" class="flex flex-col items-center relative z-20 w-full max-w-sm shrink-0">
+            
+            <!-- Specialist Agent -->
+            <div class="border-2 border-emerald-500 bg-emerald-950/20 p-4 rounded-xl flex flex-col items-center text-center relative w-full shadow-[0_0_20px_rgba(16,185,129,0.2)] z-10">
+                <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-emerald-500 text-slate-950 text-[8px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider whitespace-nowrap">
                     ✅ PASS (Factual & Spatial)
                 </span>
-                <span class="text-xl">✍️</span>
-                <h5 class="text-[10px] font-black text-emerald-400 uppercase mt-1.5">5b. SPECIALIST</h5>
-                <span class="text-[8px] text-slate-500 font-bold">Gemini 2.5 Flash</span>
-                <p class="text-[8px] text-slate-400 mt-2 max-w-[200px]">Ingests validated script and generates 5 verified MCQs</p>
+                <span class="text-xl mt-2">✍️</span>
+                <h5 class="text-[11px] font-black text-emerald-400 uppercase mt-1.5">5b. SPECIALIST</h5>
+                <span class="text-[8px] text-slate-400 font-bold">Gemini 2.5 Flash</span>
+                <p class="text-[9px] text-slate-300 mt-2">Ingests validated script & generates 5 verified MCQs</p>
+            </div>
+
+            <svg class="h-8 w-6 text-teal-500 animate-pulse my-3" viewBox="0 0 24 32">
+                <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4"/>
+                <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+            </svg>
+
+            <!-- Sync Engine -->
+            <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl w-full relative shadow-xl flex flex-col items-center">
+                <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-800 border border-slate-600 px-4 py-0.5 text-[9px] font-bold text-teal-400 uppercase tracking-widest rounded-full whitespace-nowrap">
+                    🔄 Sync Engine
+                </span>
                 
-                <!-- ROUTE TO SYNC INDICATOR -->
-                <div class="mt-4 flex items-center justify-center gap-2 text-emerald-500 font-black text-[9px]">
-                    <span>➡️ Route to Sync Engine</span>
-                    <svg class="h-4 w-6" viewBox="0 0 24 16">
-                        <path d="M 0,8 L 20,8" stroke="currentColor" stroke-width="2"/>
-                        <polygon points="20,8 14,4 14,12" fill="currentColor"/>
-                    </svg>
+                <div class="flex flex-col sm:flex-row gap-4 w-full mt-2 justify-center">
+                    <div class="bg-slate-950 border border-slate-800 p-3 rounded-lg flex flex-col items-center text-center w-full shadow-inner">
+                        <span class="text-lg">🖼️</span>
+                        <span class="text-[9px] font-black uppercase text-emerald-400 mt-1.5">Forensic Compositor</span>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 p-3 rounded-lg flex flex-col items-center text-center w-full shadow-inner">
+                        <span class="text-lg">🎙️</span>
+                        <span class="text-[9px] font-black uppercase text-emerald-400 mt-1.5">Audio Engine (TTS)</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Downward Connection to Sync Engine -->
-    <div class="flex flex-col items-center relative z-20">
-        <svg class="h-8 w-6 text-teal-500 animate-pulse" viewBox="0 0 24 32">
-            <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4"/>
-            <polygon points="12,32 8,24 16,24" fill="currentColor"/>
-        </svg>
-    </div>
+            <svg class="h-8 w-6 text-emerald-500 animate-pulse my-3" viewBox="0 0 24 32">
+                <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5"/>
+                <polygon points="12,32 8,24 16,24" fill="currentColor"/>
+            </svg>
 
-    <!-- 3. ROW 4: Parallel Synchronization Engine -->
-    <div class="bg-slate-950/60 border border-slate-800 p-6 w-full max-w-lg relative shadow-2xl z-10 flex flex-col items-center">
-        <span class="absolute -top-3 left-6 bg-slate-900 border border-slate-800 px-4 py-0.5 text-[9px] font-bold text-teal-400 uppercase tracking-widest">
-            🔄 Parallel Synchronization Engine
-        </span>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full pt-2 relative z-20">
-            <!-- Forensic Compositor -->
-            <div class="bg-slate-900 border-2 border-emerald-500/80 p-3.5 flex flex-col items-center text-center shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-                <span class="text-xl">🖼️</span>
-                <span class="text-[10px] font-black uppercase text-emerald-400 mt-1.5">Forensic Compositor</span>
-                <p class="text-[8px] text-slate-500 mt-1 leading-normal">Overlay PIL coordinates on generated map</p>
+            <!-- Output Box -->
+            <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black px-6 py-4 rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.5)] border-2 border-emerald-300 text-[11px] tracking-widest uppercase text-center w-full">
+                🏆 Verified IELTS Exam Artifact
             </div>
-            
-            <!-- Audio Engine -->
-            <div class="bg-slate-900 border-2 border-emerald-500/80 p-3.5 flex flex-col items-center text-center shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-                <span class="text-xl">🎙️</span>
-                <span class="text-[10px] font-black uppercase text-emerald-400 mt-1.5">Audio Engine</span>
-                <p class="text-[8px] text-teal-400 font-bold mt-1 leading-normal">Google Cloud TTS & Word-Level Alignment</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Downward Connection to Output -->
-    <div class="flex flex-col items-center relative z-20">
-        <svg class="h-8 w-6 text-emerald-500 animate-pulse" viewBox="0 0 24 32">
-            <line x1="12" y1="0" x2="12" y2="32" stroke="currentColor" stroke-width="2.5" stroke-dasharray="4"/>
-            <polygon points="12,32 8,24 16,24" fill="currentColor"/>
-        </svg>
-    </div>
-
-    <!-- 4. BOTTOM ROW: Verified Artifact -->
-    <div class="flex flex-col items-center relative z-20">
-        <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black px-8 py-3.5 shadow-[0_0_35px_rgba(16,185,129,0.5)] border-2 border-emerald-400 text-xs tracking-widest uppercase">
-            🏆 Verified IELTS Exam Artifact Released
         </div>
     </div>
 </div>`;
@@ -1569,10 +1594,24 @@ function loadAuditStats(mode = 'baseline') {
             // Dynamically update the Empirical Conclusion text
             const conclusionEl = document.getElementById('auditConclusionText');
             if (conclusionEl && data.total > 0) {
-                conclusionEl.innerHTML = `
-                    RALE Architect converted a <strong>${fpPct}%</strong> first-pass success rate into <strong>${totalPassPct}%</strong> final validated success through validator-guided repair. 
-                    Failed artefacts were rejected with specific reasons, repaired through the escalated path, and revalidated before release, while clean runs stayed on the faster low-cost path.
-                `;
+                if (mode === 'stress') {
+                    conclusionEl.innerHTML = `
+                        Under failure-boundary spatial constraints, first-pass success fell to <strong>${fpPct}%</strong>. RALE Architect automatically detected invalid outputs, routed them through validator-guided repair, and increased final validated success to <strong>${totalPassPct}%</strong> across <strong>${data.total}</strong> evaluation runs. Every rejection, repair decision, and final outcome was captured through ADK events and persisted to the Cloud SQL audit ledger.
+                    `;
+                } else {
+                    conclusionEl.innerHTML = `
+                        RALE Architect converted a <strong>${fpPct}%</strong> first-pass success rate into <strong>${totalPassPct}%</strong> final validated success through validator-guided repair. 
+                        Failed artefacts were rejected with specific reasons, repaired through the escalated path, and revalidated before release, while clean runs stayed on the faster low-cost path.
+                    `;
+                }
+            }
+
+            let financialTitle = "Lower Avoidable API Spend";
+            let financialText = `Targeted repair avoided full pipeline regeneration, reducing avoidable evaluation cost from <strong>$${data.pro_cost ? data.pro_cost.toFixed(2) : '0.00'}</strong> to <strong>$${data.actual_cost ? data.actual_cost.toFixed(2) : '0.00'}</strong> across <strong>${data.total}</strong> runs.`;
+
+            if (mode === 'stress') {
+                financialTitle = "Resilience Under Constraint";
+                financialText = `Targeted repair prioritised structural integrity over cost, recovering <strong>${data.healed_success}</strong> constrained generations and reaching <strong>${totalPassPct}%</strong> final validated success across <strong>${data.total}</strong> failure-boundary runs.`;
             }
 
             grid.innerHTML = `
@@ -1594,10 +1633,10 @@ function loadAuditStats(mode = 'baseline') {
                         <h4 class="text-xs font-black uppercase tracking-wider text-slate-500 mb-6 flex items-center gap-2"><span class="text-emerald-500">2.</span> Financial Optimization</h4>
                         <div class="flex items-baseline gap-2 mb-2">
                             <span class="text-5xl font-black text-white tracking-tighter">${data.savings_pct ? data.savings_pct.toFixed(1) : '0.0'}%</span>
-                            <span class="text-sm font-bold text-emerald-400 uppercase tracking-widest">Lower Avoidable API Spend</span>
+                            <span class="text-sm font-bold text-emerald-400 uppercase tracking-widest">${financialTitle}</span>
                         </div>
                         <p class="text-base text-slate-400 font-medium leading-relaxed">
-                            Targeted repair avoided full pipeline regeneration, reducing avoidable evaluation cost from <strong>$${data.pro_cost ? data.pro_cost.toFixed(2) : '0.00'}</strong> to <strong>$${data.actual_cost ? data.actual_cost.toFixed(2) : '0.00'}</strong> across <strong>${data.total}</strong> runs.
+                            ${financialText}
                         </p>
                     </div>
                 </div>
@@ -1777,9 +1816,25 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDAG(state.activeGraphView);
         const btnYourRun = document.getElementById('graphViewYourRun');
         const btnFull = document.getElementById('graphViewFull');
+        const btnFullscreen = document.getElementById('graphFullscreenBtn');
+        const graphContainer = document.getElementById('mermaidGraph').parentElement;
+
         if (btnYourRun && btnFull) {
             btnYourRun.onclick = (e) => { e.stopPropagation(); state.activeGraphView = 'your_run'; renderDAG('your_run'); };
             btnFull.onclick = (e) => { e.stopPropagation(); state.activeGraphView = 'full'; renderDAG('full'); };
+        }
+
+        if (btnFullscreen && graphContainer) {
+            btnFullscreen.onclick = (e) => {
+                e.stopPropagation();
+                if (!document.fullscreenElement) {
+                    graphContainer.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            };
         }
     };
 

@@ -177,6 +177,14 @@ def create_app(test_config=None):
         resp.headers['Expires'] = '0'
         return resp
 
+    @app.route('/blueprint')
+    def blueprint():
+        resp = make_response(render_template('blueprint.html'))
+        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        resp.headers['Pragma'] = 'no-cache'
+        resp.headers['Expires'] = '0'
+        return resp
+
     @app.route('/api/trace', methods=['GET'])
     def get_trace():
         run_id = request.args.get('run_id')
@@ -267,6 +275,7 @@ def create_app(test_config=None):
                 "scenario": scenario_title,
                 "image_url": result['image_url'],
                 "teacher_image_b64": teacher_b64,
+                "student_image_b64": base64.b64encode(result['raw_binary']).decode('utf-8'),
                 "vision_result": result['vision_result'],
                 "questions": result['vision_result'].get('questions', []),
                 "audio_url": audio_res.get('audio_url', "") if audio_res.get('status') == 'success' else "",
